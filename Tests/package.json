@@ -1,0 +1,22 @@
+{
+  "name": "test_todolist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./app.js",
+    "test": "mocha tests/test.js"
+  },
+  "author": "Joris CHALUMEAU",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "*"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "chai-http": "^4.3.0",
+    "express": "^4.16.3",
+    "mongoose": "^5.3.1"
+  }
+}

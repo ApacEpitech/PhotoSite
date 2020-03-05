@@ -1,0 +1,7 @@
+bson
+boto3
+flask
+flask_pymongo
+pymongo
+werkzeug
+flask-cors

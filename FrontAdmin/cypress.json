@@ -1,0 +1,7 @@
+{
+  "waitForAnimations": false,
+  "animationDistanceThreshold": 50,
+  "watchForFileChanges": false,
+  "viewportHeight": 1080,
+  "viewportWidth": 1920
+}

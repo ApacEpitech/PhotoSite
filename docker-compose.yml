@@ -1,0 +1,20 @@
+version: '3'
+services:
+  front:
+    build: ./Front
+    ports:
+      - "3000:3000"
+  back:
+    build: ./Back
+    ports:
+      - "5000:5000"
+    links:
+      - mongodb
+  mongodb:
+    image: mongo:3.6.1
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+  redis:
+    image: "redis:alpine"
