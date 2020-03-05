@@ -97,9 +97,11 @@ def update_photo():
         return bad_request()
 
 
-@app.route('/photos/<id>', methods=['DELETE'])
-def delete_photo(id):
-    # mongo.db.photo.delete_one({'_id': ObjectId(id)})
+@app.route('/photos/<_id>', methods=['DELETE'])
+def delete_photo(_id):
+    table.delete_item(
+        Key={'PhotoID': decimal.Decimal(_id)},
+    )
     resp = ''
     return Response(resp, status=200, mimetype='application/json')
 
