@@ -7,7 +7,7 @@ from bson.json_util import dumps
 from flask import request, Response
 from boto3.dynamodb.conditions import Key
 
-table = dynamodb.Table('Photos')
+table = dynamodb.Table('Categories')
 
 
 @app.route('/categories', methods=['POST'])
