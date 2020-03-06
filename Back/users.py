@@ -96,7 +96,7 @@ def delete_user(email):
 
 
 @app.errorhandler(404)
-def not_found():
+def not_found(err):
     message = {
         'status': 404,
         'message': 'Not Found: ' + request.url,
