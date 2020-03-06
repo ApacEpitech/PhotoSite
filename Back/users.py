@@ -1,7 +1,7 @@
 from app import app, dynamodb
 from bson.json_util import dumps
 from flask import request, Response
-from werkzeug import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from boto3.dynamodb.conditions import Key
 
 table = dynamodb.Table('Users')
