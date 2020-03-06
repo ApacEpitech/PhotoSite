@@ -80,7 +80,7 @@ def update_photo():
     _description = _json['description']
     _id = _json['PhotoID']
     # validate the received values
-    if _id:
+    if _id and _category and _destination and _description:
         # save edits
         table.update_item(
             Key={'PhotoID': decimal.Decimal(_id)},
@@ -94,7 +94,7 @@ def update_photo():
         )
         return photo(_id)
     else:
-        return bad_request()
+        return bad_request("PhotoID, category, destination or description")
 
 
 @app.route('/photos/<_id>', methods=['DELETE'])
@@ -124,16 +124,6 @@ def bad_request(missing):
     }
     resp = dumps(message)
     return Response(resp, status=400, mimetype='application/json')
-
-
-@app.errorhandler(401)
-def bad_request():
-    message = {
-        'status': 401,
-        'message': 'Bad request: ' + request.url,
-    }
-    resp = dumps(message)
-    return Response(resp, status=401, mimetype='application/json')
 
 
 def find_photo(photo_id):
