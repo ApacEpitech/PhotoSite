@@ -47,7 +47,7 @@ def update_category():
     _title = _json['title']
     _id = _json['CategoryID']
     # validate the received values
-    if _id:
+    if _id and _title:
         # save edits
         table.update_item(
             Key={'CategoryID': decimal.Decimal(_id)},
@@ -59,7 +59,7 @@ def update_category():
         )
         return category(_id)
     else:
-        return bad_request()
+        return bad_request('CategoryID or title')
 
 
 @app.route('/categories/<_id>', methods=['DELETE'])
@@ -81,21 +81,11 @@ def not_found():
     return Response(resp, status=404, mimetype='application/json')
 
 
-@app.errorhandler(400)
+@app.errorhandler(401)
 def bad_request(missing):
     message = {
-        'status': 404,
-        'message': 'Not Found: ' + missing,
-    }
-    resp = dumps(message)
-    return Response(resp, status=400, mimetype='application/json')
-
-
-@app.errorhandler(401)
-def bad_request():
-    message = {
         'status': 401,
-        'message': 'Bad request: ' + request.url,
+        'message': 'Not Found: ' + missing,
     }
     resp = dumps(message)
     return Response(resp, status=401, mimetype='application/json')
