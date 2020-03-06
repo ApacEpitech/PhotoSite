@@ -15,7 +15,7 @@ def add_user():
     user_found = table.query(
         KeyConditionExpression=Key('email').eq(_email)
     )
-    if user_found:
+    if user_found['Items']:
         return unauthorized()
     # validate the received values
     if _email and _password:
