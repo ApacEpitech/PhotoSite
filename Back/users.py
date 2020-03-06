@@ -51,7 +51,6 @@ def user_connect():
     _json = request.json
     _email = _json.get('email')
     _password = _json.get('password')
-    _hashed_password = generate_password_hash(_password)
     user_found = find_user(_email)
     if user_found and check_password_hash(user_found['password'], _password):
         resp = dumps(user_found)

@@ -4,8 +4,6 @@ from flask_cors import CORS
 import boto3
 
 app = Flask(__name__)
-app.secret_key = ""
-app.config["MONGO_URI"] = "mongodb://localhost:27017/todolist"
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 try:
