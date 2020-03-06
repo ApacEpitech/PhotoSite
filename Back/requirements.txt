@@ -5,3 +5,4 @@ flask_pymongo
 pymongo
 werkzeug
 flask-cors
+gunicorn
