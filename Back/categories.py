@@ -13,7 +13,7 @@ table = dynamodb.Table('Photos')
 @app.route('/categories', methods=['POST'])
 def add_category():
     _json = request.json
-    _title = _json['title']
+    _title = _json.get('title')
     # validate the received values
     if _title:
         # save details
@@ -44,8 +44,8 @@ def category(_id):
 @app.route('/categories', methods=['PUT'])
 def update_category():
     _json = request.json
-    _title = _json['title']
-    _id = _json['CategoryID']
+    _title = _json.get('title')
+    _id = _json.get('CategoryID')
     # validate the received values
     if _id and _title:
         # save edits

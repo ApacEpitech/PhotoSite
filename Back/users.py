@@ -10,8 +10,8 @@ table = dynamodb.Table('Users')
 @app.route('/users', methods=['POST'])
 def add_user():
     _json = request.json
-    _email = _json['mail']
-    _password = _json['password']
+    _email = _json.get('mail')
+    _password = _json.get('password')
     user_found = table.query(
         KeyConditionExpression=Key('email').eq(_email)
     )
@@ -49,8 +49,8 @@ def user(email):
 @app.route('/users/connect', methods=['POST'])
 def user_connect():
     _json = request.json
-    _email = _json['email']
-    _password = _json['password']
+    _email = _json.get('email')
+    _password = _json.get('password')
     _hashed_password = generate_password_hash(_password)
     user_found = find_user(_email)
     if user_found and check_password_hash(user_found['password'], _password):
@@ -63,8 +63,8 @@ def user_connect():
 @app.route('/users', methods=['PUT'])
 def update_user():
     _json = request.json
-    _email = _json['email']
-    _password = _json['pwd']
+    _email = _json.get('email')
+    _password = _json.get('pwd')
     # validate the received values
     if _email:
         if _password and _password != '':
@@ -96,7 +96,7 @@ def delete_user(email):
 
 
 @app.errorhandler(404)
-def not_found(err):
+def not_found():
     message = {
         'status': 404,
         'message': 'Not Found: ' + request.url,

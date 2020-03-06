@@ -13,10 +13,10 @@ table = dynamodb.Table('Photos')
 @app.route('/photos', methods=['POST'])
 def add_photo():
     _json = request.json
-    _category = _json['category']
-    _destination = _json['destination']
-    _description = _json['description']
-    _binary = _json['binary']
+    _category = _json.get('category')
+    _destination = _json.get('destination')
+    _description = _json.get('description')
+    _binary = _json.get('binary')
     # validate the received values
     if _destination and _category and _binary:
         # save details
@@ -36,9 +36,8 @@ def add_photo():
 @app.route('/photos', methods=['GET'])
 def photos():
     _json = request.json
-    _categories = _json['categories']
-    _destination = _json['destinations']
-    scan = {}
+    _categories = _json.get('categories')
+    _destination = _json.get('destinations')
 
     if _categories and _destination:
         scan = {'Category': {
@@ -58,7 +57,7 @@ def photos():
             'ComparisonOperator': 'IN'}
         }
     else:
-        bad_request('Categories or Destinations')
+        scan = {}
 
     all_photos = table.scan(
         ScanFilter=scan
@@ -75,10 +74,10 @@ def photo(_id):
 @app.route('/photos', methods=['PUT'])
 def update_photo():
     _json = request.json
-    _category = _json['category']
-    _destination = _json['destination']
-    _description = _json['description']
-    _id = _json['PhotoID']
+    _category = _json.get('category')
+    _destination = _json.get('destination')
+    _description = _json.get('description')
+    _id = _json.get('PhotoID')
     # validate the received values
     if _id and _category and _destination and _description:
         # save edits
