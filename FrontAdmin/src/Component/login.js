@@ -15,36 +15,24 @@ class Login extends React.Component{
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const user = {
-                    'mail': values.username ,
+                    'email': values.username ,
                     'password': values.password
                 };
                 axios.post('http://localhost:5000/users/connect',user, { headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
-                        console.log(res.data);
-                        const user = res.data;
-                        if (user.status === undefined) {
-                            if (user.banned) {
-                                alert("You are banned!");
-                            }
-                            else if (user.administrator) {
-                                Cookies.set('id', user._id.$oid);
-                                window.location = './homeAdmin?show=All';
-                            } else {
-                                Cookies.set('id', user._id.$oid);
-
-                                window.location = './home?show=All';
-                            }
+                        if (res.status === 200) {
+                            const token = res.data['access_token'];
+                            Cookies.set('jwt', token);
+                            window.location = './homeAdmin';
                         } else {
                             alert("Email Or Password Incorrect")
                         }
-
                     })
                     .catch(error => {
                         console.log(error);
                         alert("Email Or Password Incorrect")
 
                     });
-                console.log('Received values of form: ', values);
             }
         });
     };

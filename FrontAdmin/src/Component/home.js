@@ -29,7 +29,6 @@ export default class Home extends React.Component{
         if (Cookies.get('id') !== undefined && Cookies.get('id') !== "") {
             axios.get('http://localhost:5000/users/' + Cookies.get('id'),{ headers: {"Access-Control-Allow-Origin": "*"}})
                 .then(res => {
-                    console.log(res.data);
                     const users = res.data;
                     this.currentUser = users;
 

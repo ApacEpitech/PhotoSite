@@ -5,7 +5,6 @@ import 'antd/dist/antd.css';
 import {Link} from "react-router-dom";
 import axios from "axios";
 import Cookies from 'js-cookie';
-import queryString from 'query-string';
 import TextArea from "antd/es/input/TextArea";
 const { Option } = Select;
 const { Content, Footer, Sider } = Layout;
@@ -14,83 +13,44 @@ export default class HomeAdmin extends React.Component{
 
     state = {
         tasks: [],
-        allUsers: []
+        allCategories: [],
+        allDestinations: []
     };
 
     stateNewTaskModal = { visible: false };
     stateEditTaskModal = { visible: false };
 
-    currentUser;
     showAll = false;
     showDone = false;
     showUnDone = false;
     selectedTasksEdit;
     selectedUser;
 
+    //, "Authorization": 'Bearer ' + Cookies.get('jwt')}
 
     componentDidMount() {
-        if (Cookies.get('id') !== undefined && Cookies.get('id') !== "") {
-            axios.get('http://localhost:5000/users/' + Cookies.get('id'),{ headers: {"Access-Control-Allow-Origin": "*"}})
-                .then(res => {
-                    console.log(res.data);
-                    const users = res.data;
-                    this.currentUser = users;
-
-                    axios.get('http://localhost:5000/tasks',{ headers: {"Access-Control-Allow-Origin": "*"}})
-                        .then(res => {
-                            console.log(res.data);
-                            var tasks = res.data;
-                            let url = this.props.location.search;
-                            let params = queryString.parse(url);
-                            switch (params.show) {
-                                case "All":
-                                    this.showAll = true;
-                                    break;
-                                case "Done":
-                                    this.showDone = true;
-                                    break;
-                                case "UnDone":
-                                    this.showUnDone = true;
-                                    break;
-                                default :
-                                    this.showAll = true;
-                                    break;
-                            }
-                            var tasksSave = [];
-
-                            if (this.showUnDone) {
-                                var i = 0;
-                                while (i < tasks.length) {
-                                    if (!tasks[i].done) {
-                                        tasksSave.push(tasks[i]);
-                                    }
-                                    i += 1;
-                                }
-                            } else if (this.showDone) {
-                                var i = 0;
-                                while (i < tasks.length) {
-                                    if (tasks[i].done) {
-                                        tasksSave.push(tasks[i]);
-                                    }
-                                    i += 1;
-                                }
-                            } else {
-                                tasksSave = tasks;
-                            }
-                            tasks = tasksSave;
-                            this.setState({ tasks });
-                        });
-                    axios.get('http://localhost:5000/users',{ headers: {"Access-Control-Allow-Origin": "*"}})
-                        .then(res => {
-                            console.log(res.data);
-                            var allUsers = res.data;
-                            this.setState({allUsers:allUsers})
-                        });
-                })
+        if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
+            axios.get('http://localhost:5000/photos',
+                { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
+                console.log(res.data);
+            }).catch(err => {
+                console.log(err);
+            });
+            axios.get('http://localhost:5000/categories',
+                { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
+                this.setState({allCategories:res.data});
+            }).catch(err => {
+                console.log(err);
+            });
+            axios.get('http://localhost:5000/destinations',
+                { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
+                this.setState({allDestinations:res.data});
+            }).catch(err => {
+                console.log(err);
+            });
         } else {
             window.location = 'login';
         }
-
     }
 
     onChange(e) {
@@ -326,27 +286,42 @@ export default class HomeAdmin extends React.Component{
                         </div>
 
                         <Modal
-                            title="New Task"
+                            title="Ajouter une image"
                             visible={this.stateNewTaskModal.visible}
                             onOk={this.handleOkNewTaskModal}
                             onCancel={this.handleCancelNewTaskModal}
-                            okText={'Create'}>
-                            <Form                             id="createTask"
->
+                            cancelText="Annuler"
+                            okText={'Ajouter'}>
+                            <Form id="insertImage">
                                 <Form.Item>
                                     <Input
                                         prefix={<Icon type="project" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                                        placeholder="Title" id={"NewTitleTask"}
+                                        placeholder="Description" id={"NewImageDesc"}
                                     />
                                 </Form.Item>
                                 <Form.Item>
                                     <Select
                                         style={{ width: 120, marginRight: 10 }}
+                                        placeholder="Catégorie"
                                         onSelect={(value, event) => this.onChangeUserSelect(value, event)}>
                                         {
-                                            this.state.allUsers.map(val => (
-                                                <Option key={val._id.$oid} value={val._id.$oid}>
-                                                    {val.email}
+                                            this.state.allCategories.map(val => (
+                                                <Option key={val.CategoryID} value={val.CategoryID}>
+                                                    {val.title}
+                                                </Option>
+                                            ))}
+                                    </Select>
+                                </Form.Item>
+                                <Form.Item>
+                                    <Select
+                                        defaultValue={this.state.userAssigned}
+                                        placeholder="Destination"
+                                        style={{ width: 120, marginRight: 10 }}
+                                        onSelect={(value, event) => this.onChangeUserSelect(value, event)}>
+                                        {
+                                            this.state.allDestinations.map(val => (
+                                                <Option key={val.DestinationID} value={val.DestinationID}>
+                                                    {val.name}
                                                 </Option>
                                             ))}
                                     </Select>
@@ -355,11 +330,11 @@ export default class HomeAdmin extends React.Component{
                         </Modal>
 
                         <Modal
-                            title="Edit Task"
+                            title="Modifier image"
                             visible={this.stateEditTaskModal.visible}
                             onOk={this.handleOkEditTaskModal}
                             onCancel={this.handleCancelEditTaskModal}
-                            okText={'Edit'}
+                            okText={'Modifier'}
                         >
                             <Form >
                                 <Form.Item>
@@ -381,8 +356,8 @@ export default class HomeAdmin extends React.Component{
                                         onSelect={(value, event) => this.onChangeUserSelect(value, event)}
                                     >
                                         {
-                                            this.state.allUsers.map(val => (
-                                            <Option key={val._id.$oid} value={val._id.$oid}>
+                                            this.state.allCategories.map(val => (
+                                            <Option key={val.CategoryID} value={val.CategoryID}>
                                                 {val.email}
                                             </Option>
                                         ))}
@@ -391,7 +366,7 @@ export default class HomeAdmin extends React.Component{
                             </Form>
                         </Modal>
                     </Content>
-                    <Footer style={{ textAlign: 'center' }}>Designed By Enzo Scaduto  </Footer>
+                    <Footer style={{ textAlign: 'center' }}>Designed By CUEVAS Alexandre  </Footer>
                 </Layout>
             </Layout>)
     }

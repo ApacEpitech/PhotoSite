@@ -2,6 +2,7 @@ import React from "react";
 import {Layout, Card, Row, Col} from 'antd';
 import 'antd/dist/antd.css';
 import "./home.css";
+import axios from "axios";
 import Select from "react-dropdown-select";
 
 const {Content, Footer} = Layout;
@@ -9,14 +10,19 @@ const {Content, Footer} = Layout;
 export default class Home extends React.Component {
 
     state = {
-        tasks: [],
+        images: [],
         categories: [],
         categoriesSelected: [],
-        destinations: []
+        destinations: [],
+        destinationsSelected: [],
+        sub_categories: [],
+        sub_categories_selected: []
     };
 
     componentDidMount() {
-        this.setState({categories: [{id: 0, name: ' '}, {id: 1, name: 'Musée'}, {id: 2, name: 'Monuments'}]});
+        axios.get('http://localhost:5000/categories').then(res => {
+            this.setState({categories: res.data});
+        });
     }
 
     setValues = categoriesSelected => this.setState({categoriesSelected});
@@ -33,11 +39,11 @@ export default class Home extends React.Component {
                             <div style={{display: "inline"}}>
                                 <Select onChange={(values) => this.setValues(values)}
                                         options={this.state.categories}
-                                        labelField={'name'}
+                                        labelField={'title'}
                                         loading={true}
-                                        searchBy={'name'}
+                                        searchBy={'title'}
                                         multi={true}
-                                        valueField={'id'}
+                                        valueField={'CategoryID'}
                                         clearable={true}
                                         values={this.state.categoriesSelected}/>
                                 <Select onChange={(values) => this.setValues(values)}
@@ -51,20 +57,6 @@ export default class Home extends React.Component {
                                         values={this.state.categoriesSelected}/>
                             </div>
                             <br/>
-
-                            <Row>
-                                {
-                                    this.state.tasks.map(task =>
-                                        <Col span={8}>
-                                            <Card bordered={true} style={{width: 300, marginBottom: '2%'}}
-                                                  title={task.title}>
-                                                <br/>
-                                                <p>{task.content}</p>
-                                            </Card>
-                                        </Col>
-                                    )
-                                }
-                            </Row>
                         </div>
 
                     </Content>
