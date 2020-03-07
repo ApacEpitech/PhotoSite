@@ -12,7 +12,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.errorhandler(404)
-def not_found():
+def not_found(url):
     message = {
         'status': 404,
         'message': 'Not Found: ' + request.url,

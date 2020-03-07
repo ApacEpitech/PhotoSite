@@ -32,7 +32,7 @@ def add_category():
 def categories():
     all_categories = table.scan(
         ScanFilter={}
-    )
+    )['Items']
     return Response(json.dumps(all_categories, cls=DecimalEncoder.DecimalEncoder), status=200,
                     mimetype='application/json')
 

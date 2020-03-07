@@ -52,20 +52,20 @@ def add_photo():
 @app.route('/photos', methods=['GET'])
 def photos():
     _json = request.json
-    _categories = _json.get('categories')
-    _destination = _json.get('destinations')
-    _sub_categories = _json.get('sub_categories')
     scan = {}
-    if _categories:
-        scan['category'] = {'AttributeValueList': _categories, 'ComparisonOperator': 'IN'}
-    if _destination:
-        scan['destination'] = {'AttributeValueList': _destination, 'ComparisonOperator': 'IN'}
-    if _categories:
-        scan['sub_category'] = {'AttributeValueList': _sub_categories, 'ComparisonOperator': 'IN'}
-    scan = json.dumps(scan)
+    if _json:
+        _categories = _json.get('categories')
+        _destination = _json.get('destinations')
+        _sub_categories = _json.get('sub_categories')
+        if _categories:
+            scan['category'] = {'AttributeValueList': _categories, 'ComparisonOperator': 'IN'}
+        if _destination:
+            scan['destination'] = {'AttributeValueList': _destination, 'ComparisonOperator': 'IN'}
+        if _categories:
+            scan['sub_category'] = {'AttributeValueList': _sub_categories, 'ComparisonOperator': 'IN'}
     all_photos = table.scan(
         ScanFilter=scan
-    )
+    )['Items']
     return Response(json.dumps(all_photos, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
 
 

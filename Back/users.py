@@ -12,13 +12,13 @@ table = dynamodb.Table('Users')
 @jwt_required
 def add_user():
     _json = request.json
-    _email = _json.get('mail')
+    _email = _json.get('email')
     _password = _json.get('password')
     user_found = table.query(
         KeyConditionExpression=Key('email').eq(_email)
     )
     if user_found['Items']:
-        return bad_request()
+        return bad_request('already exists')
     # validate the received values
     if _email and _password:
         # do not save password as a plain text
@@ -29,8 +29,8 @@ def add_user():
             'password': _hashed_password
         }
         table.put_item(Item=item)
-        access_token = create_access_token(identity=_email)
-        return Response(jsonify(access_token=access_token), status=201, mimetype='application/json')
+        access_token = {'access_token': create_access_token(identity=_email)}
+        return Response(dumps(access_token), status=201, mimetype='application/json')
     else:
         return not_found()
 
@@ -58,10 +58,10 @@ def user_connect():
     _password = _json.get('password')
     user_found = find_user(_email)
     if user_found and check_password_hash(user_found['password'], _password):
-        access_token = create_access_token(identity=_email)
-        return Response(jsonify(access_token=access_token), status=200, mimetype='application/json')
+        access_token = {'access_token': create_access_token(identity=_email)}
+        return Response(dumps(access_token), status=200, mimetype='application/json')
     else:
-        return bad_request()
+        return bad_request('login')
 
 
 @app.route('/users', methods=['PUT'])
@@ -103,6 +103,9 @@ def delete_user(email):
 
 def find_user(email):
     user_found = table.query(
-        KeyConditionExpression=Key('email').eq(email)
-    )
-    return user_found
+        KeyConditionExpression=Key('email').eq(str(email))
+    )['Items']
+    if user_found:
+        return user_found[0]
+    else:
+        return {}
