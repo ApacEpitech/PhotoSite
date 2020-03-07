@@ -1,6 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
-import Button from 'antd/es/button';
 import './App.css';
 import Home from './Component/home';
 import Login from './Component/login';
@@ -9,8 +7,7 @@ import Users from './Component/users';
 import {
     BrowserRouter as Router,
     Switch,
-    Route,
-    Link
+    Route
 } from "react-router-dom";
 import HomeAdmin from "./Component/homeAdmin";
 

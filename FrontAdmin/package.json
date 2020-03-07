@@ -33,8 +33,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "cypress": "^3.7.0",
-    "cypress-skip-and-only-ui": "^1.2.6"
-  }
+  "devDependencies": {}
 }
