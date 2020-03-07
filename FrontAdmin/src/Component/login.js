@@ -18,7 +18,7 @@ class Login extends React.Component{
                     'email': values.username ,
                     'password': values.password
                 };
-                axios.post('http://localhost:5000/users/connect',user, { headers: {"Access-Control-Allow-Origin": "*"}})
+                axios.post('http://www.holy-driver.tools:4000/users/connect',user, { headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
                         if (res.status === 200) {
                             const token = res.data['access_token'];

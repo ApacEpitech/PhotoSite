@@ -30,19 +30,19 @@ export default class HomeAdmin extends React.Component{
 
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
-            axios.get('http://localhost:5000/photos',
+            axios.get('http://www.holy-driver.tools:4000/photos',
                 { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
                 console.log(res.data);
             }).catch(err => {
                 console.log(err);
             });
-            axios.get('http://localhost:5000/categories',
+            axios.get('http://www.holy-driver.tools:4000/categories',
                 { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
                 this.setState({allCategories:res.data});
             }).catch(err => {
                 console.log(err);
             });
-            axios.get('http://localhost:5000/destinations',
+            axios.get('http://www.holy-driver.tools:4000/destinations',
                 { headers: {"Access-Control-Allow-Origin": "*"}}, {}).then(res => {
                 this.setState({allDestinations:res.data});
             }).catch(err => {
@@ -94,7 +94,7 @@ export default class HomeAdmin extends React.Component{
                     'user_id': this.selectedUser
                 };
                 console.log(task);
-                axios.post(`http://localhost:5000/tasks`, task)
+                axios.post(`http://www.holy-driver.tools:4000/tasks`, task)
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -124,14 +124,14 @@ export default class HomeAdmin extends React.Component{
 
     // Part Edit Task
     showModalEditTaskModal = e => {
-        axios.get('http://localhost:5000/tasks/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.get('http://www.holy-driver.tools:4000/tasks/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 const task = res.data;
                 this.selectedTasksEdit = task;
                 this.stateEditTaskModal.visible = true;
                 this.selectedUser = task.user_id;
-                axios.get('http://localhost:5000/users/'+this.selectedUser,{ headers: {"Access-Control-Allow-Origin": "*"}})
+                axios.get('http://www.holy-driver.tools:4000/users/'+this.selectedUser,{ headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
                         console.log(res.data);
                         const user = res.data;
@@ -156,7 +156,7 @@ export default class HomeAdmin extends React.Component{
                 'done': this.selectedTasksEdit.done
             };
             console.log(task);
-            axios.put(`http://localhost:5000/tasks`, task)
+            axios.put(`http://www.holy-driver.tools:4000/tasks`, task)
                 .then(res => {
                     console.log(res);
                     console.log(res.data);
@@ -193,7 +193,7 @@ export default class HomeAdmin extends React.Component{
     }
 
     onChangeStateDone = e => {
-        axios.get('http://localhost:5000/tasks/'+e.target.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.get('http://www.holy-driver.tools:4000/tasks/'+e.target.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 const task = res.data;
@@ -205,7 +205,7 @@ export default class HomeAdmin extends React.Component{
                     'done': !task.done
                 };
                 console.log(JSON.stringify(taskData));
-                axios.put(`http://localhost:5000/tasks`, taskData)
+                axios.put(`http://www.holy-driver.tools:4000/tasks`, taskData)
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -215,7 +215,7 @@ export default class HomeAdmin extends React.Component{
     };
 
     onDeleteTask = e => {
-        axios.delete('http://localhost:5000/tasks/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.delete('http://www.holy-driver.tools:4000/tasks/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 window.location.reload();
