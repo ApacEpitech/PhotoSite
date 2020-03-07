@@ -1,5 +1,5 @@
 from app import *
-from bson.json_util import dumps
+from json import dumps
 from flask import request, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from boto3.dynamodb.conditions import Key
