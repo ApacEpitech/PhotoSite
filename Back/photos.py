@@ -3,9 +3,9 @@ import json
 
 import DecimalEncoder
 from app import *
-from bson.json_util import dumps
 from flask import request, Response
-from boto3.dynamodb.conditions import Key, client
+from boto3.dynamodb.conditions import Key
+from boto3 import client
 from werkzeug.security import generate_password_hash
 from flask_jwt_extended import jwt_required, create_access_token
 from PIL import Image
