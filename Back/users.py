@@ -1,13 +1,15 @@
-from app import app, dynamodb
+from app import *
 from bson.json_util import dumps
-from flask import request, Response
+from flask import request, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from boto3.dynamodb.conditions import Key
+from flask_jwt_extended import jwt_required, create_access_token
 
 table = dynamodb.Table('Users')
 
 
 @app.route('/users', methods=['POST'])
+@jwt_required
 def add_user():
     _json = request.json
     _email = _json.get('mail')
@@ -16,7 +18,7 @@ def add_user():
         KeyConditionExpression=Key('email').eq(_email)
     )
     if user_found['Items']:
-        return unauthorized()
+        return bad_request()
     # validate the received values
     if _email and _password:
         # do not save password as a plain text
@@ -27,12 +29,14 @@ def add_user():
             'password': _hashed_password
         }
         table.put_item(Item=item)
-        return Response(dumps(item), status=201, mimetype='application/json')
+        access_token = create_access_token(identity=_email)
+        return Response(jsonify(access_token=access_token), status=201, mimetype='application/json')
     else:
         return not_found()
 
 
 @app.route('/users', methods=['GET'])
+@jwt_required
 def users():
     all_users = table.scan()['Items']
     resp = dumps(all_users)
@@ -40,6 +44,7 @@ def users():
 
 
 @app.route('/users/<email>', methods=['GET'])
+@jwt_required
 def user(email):
     user_found = find_user(email)
     resp = dumps(user_found)
@@ -53,13 +58,14 @@ def user_connect():
     _password = _json.get('password')
     user_found = find_user(_email)
     if user_found and check_password_hash(user_found['password'], _password):
-        resp = dumps(user_found)
-        return Response(resp, status=200, mimetype='application/json')
+        access_token = create_access_token(identity=_email)
+        return Response(jsonify(access_token=access_token), status=200, mimetype='application/json')
     else:
-        return unauthorized()
+        return bad_request()
 
 
 @app.route('/users', methods=['PUT'])
+@jwt_required
 def update_user():
     _json = request.json
     _email = _json.get('email')
@@ -86,6 +92,7 @@ def update_user():
 
 
 @app.route('/users/<email>', methods=['DELETE'])
+@jwt_required
 def delete_user(email):
     table.delete_item(
         Key={'email': email},
@@ -93,26 +100,6 @@ def delete_user(email):
     resp = ''
     return Response(resp, status=200, mimetype='application/json')
 
-
-@app.errorhandler(404)
-def not_found():
-    message = {
-        'status': 404,
-        'message': 'Not Found: ' + request.url,
-    }
-    resp = dumps(message)
-    return Response(resp, status=404, mimetype='application/json')
-
-
-@app.errorhandler(403)
-def unauthorized():
-    message = {
-        'status': 403,
-        'message': 'Unauthorized: ' + request.url,
-    }
-    resp = dumps(message)
-
-    return Response(resp, status=403, mimetype='application/json')
 
 
 def find_user(email):

@@ -5,3 +5,5 @@ pymongo
 werkzeug
 flask-cors
 gunicorn
+flask_jwt_extended
+PIL

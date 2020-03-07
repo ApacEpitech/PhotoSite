@@ -2,15 +2,17 @@ import decimal
 import json
 
 import DecimalEncoder
-from app import app, dynamodb
+from app import *
 from bson.json_util import dumps
 from flask import request, Response
 from boto3.dynamodb.conditions import Key
+from flask_jwt_extended import jwt_required, create_access_token
 
 table = dynamodb.Table('Categories')
 
 
 @app.route('/categories', methods=['POST'])
+@jwt_required
 def add_category():
     _json = request.json
     _title = _json.get('title')
@@ -42,6 +44,7 @@ def category(_id):
 
 
 @app.route('/categories', methods=['PUT'])
+@jwt_required
 def update_category():
     _json = request.json
     _title = _json.get('title')
@@ -63,6 +66,7 @@ def update_category():
 
 
 @app.route('/categories/<_id>', methods=['DELETE'])
+@jwt_required
 def delete_category(_id):
     table.delete_item(
         Key={'CategoryID': decimal.Decimal(_id)},
@@ -70,25 +74,6 @@ def delete_category(_id):
     resp = ''
     return Response(resp, status=200, mimetype='application/json')
 
-
-@app.errorhandler(404)
-def not_found():
-    message = {
-        'status': 404,
-        'message': 'Not Found: ' + request.url,
-    }
-    resp = dumps(message)
-    return Response(resp, status=404, mimetype='application/json')
-
-
-@app.errorhandler(401)
-def bad_request(missing):
-    message = {
-        'status': 401,
-        'message': 'Not Found: ' + missing,
-    }
-    resp = dumps(message)
-    return Response(resp, status=401, mimetype='application/json')
 
 
 def find_category(category_id):

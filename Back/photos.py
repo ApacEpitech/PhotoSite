@@ -2,30 +2,46 @@ import decimal
 import json
 
 import DecimalEncoder
-from app import app, dynamodb
+from app import *
 from bson.json_util import dumps
 from flask import request, Response
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, client
+from werkzeug.security import generate_password_hash
+from flask_jwt_extended import jwt_required, create_access_token
+from PIL import Image
+import io
+import os
 
 table = dynamodb.Table('Photos')
+bucket = "apacphotosite"
+cli = client('s3', region_name='eu-west-3')
 
 
 @app.route('/photos', methods=['POST'])
+@jwt_required
 def add_photo():
     _json = request.json
     _category = _json.get('category')
+    _sub_category = _json.get('sub_category')
     _destination = _json.get('destination')
     _description = _json.get('description')
+    _title = _json.get('title')
     _binary = _json.get('binary')
     # validate the received values
-    if _destination and _category and _binary:
+    if _destination and _category and _binary and _title:
         # save details
+        image = Image.open(io.BytesIO(_binary.decode()))
+        filename, file_extension = os.path.splitext(_title)
+        _hashed_title = generate_password_hash(filename) + file_extension
+        cli.upload_file(image, bucket, _hashed_title)
+
         item = {
             'PhotoID': decimal.Decimal(max_id() + 1),
             'category': _category,
+            'sub_category': _sub_category,
             'destination': _destination,
             'description': _description,
-            'binary': _binary.encode()
+            'url': "http://s3-eu-west-3.amazonaws.com/apacphotosite/" + _hashed_title
         }
         table.put_item(Item=item)
         return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
@@ -38,27 +54,15 @@ def photos():
     _json = request.json
     _categories = _json.get('categories')
     _destination = _json.get('destinations')
-
-    if _categories and _destination:
-        scan = {'Category': {
-            'AttributeValueList': _categories,
-            'ComparisonOperator': 'IN'},
-            'Destination': {
-                'AttributeValueList': _destination,
-                'ComparisonOperator': 'IN'}
-        }
-    elif _destination:
-        scan = {'Destination': {
-            'AttributeValueList': _destination,
-            'ComparisonOperator': 'IN'}}
-    elif _categories:
-        scan = {'Category': {
-            'AttributeValueList': _categories,
-            'ComparisonOperator': 'IN'}
-        }
-    else:
-        scan = {}
-
+    _sub_categories = _json.get('sub_categories')
+    scan = {}
+    if _categories:
+        scan['category'] = {'AttributeValueList': _categories,'ComparisonOperator': 'IN'}
+    if _destination:
+        scan['destination'] = {'AttributeValueList': _destination, 'ComparisonOperator': 'IN'}
+    if _categories:
+        scan['sub_category'] = {'AttributeValueList': _sub_categories, 'ComparisonOperator': 'IN'}
+    scan = json.dumps(scan)
     all_photos = table.scan(
         ScanFilter=scan
     )
@@ -72,6 +76,7 @@ def photo(_id):
 
 
 @app.route('/photos', methods=['PUT'])
+@jwt_required
 def update_photo():
     _json = request.json
     _category = _json.get('category')
@@ -97,32 +102,13 @@ def update_photo():
 
 
 @app.route('/photos/<_id>', methods=['DELETE'])
+@jwt_required
 def delete_photo(_id):
     table.delete_item(
         Key={'PhotoID': decimal.Decimal(_id)},
     )
     resp = ''
     return Response(resp, status=200, mimetype='application/json')
-
-
-@app.errorhandler(404)
-def not_found():
-    message = {
-        'status': 404,
-        'message': 'Not Found: ' + request.url,
-    }
-    resp = dumps(message)
-    return Response(resp, status=404, mimetype='application/json')
-
-
-@app.errorhandler(400)
-def bad_request(missing):
-    message = {
-        'status': 404,
-        'message': 'Not Found: ' + missing,
-    }
-    resp = dumps(message)
-    return Response(resp, status=400, mimetype='application/json')
 
 
 def find_photo(photo_id):
