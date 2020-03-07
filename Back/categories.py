@@ -3,10 +3,9 @@ import json
 
 import DecimalEncoder
 from app import *
-from bson.json_util import dumps
 from flask import request, Response
 from boto3.dynamodb.conditions import Key
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required
 
 table = dynamodb.Table('Categories')
 
@@ -34,13 +33,15 @@ def categories():
     all_categories = table.scan(
         ScanFilter={}
     )
-    return Response(json.dumps(all_categories, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
+    return Response(json.dumps(all_categories, cls=DecimalEncoder.DecimalEncoder), status=200,
+                    mimetype='application/json')
 
 
 @app.route('/categories/<_id>', methods=['GET'])
 def category(_id):
     category_found = find_category(_id)
-    return Response(json.dumps(category_found, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
+    return Response(json.dumps(category_found, cls=DecimalEncoder.DecimalEncoder), status=200,
+                    mimetype='application/json')
 
 
 @app.route('/categories', methods=['PUT'])
@@ -73,7 +74,6 @@ def delete_category(_id):
     )
     resp = ''
     return Response(resp, status=200, mimetype='application/json')
-
 
 
 def find_category(category_id):

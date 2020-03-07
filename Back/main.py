@@ -1,5 +1,3 @@
-from photos import *
-from users import *
 from categories import *
 
 

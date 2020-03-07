@@ -1,5 +1,5 @@
-from flask import Flask
-from pymongo import errors
+from json import dumps
+from flask import Flask, request, Response
 from flask_cors import CORS
 from os import environ
 from flask_jwt_extended import (JWTManager)
@@ -42,8 +42,4 @@ def bad_request(error):
     return Response(resp, status=401, mimetype='application/json')
 
 
-try:
-    dynamodb = boto3.resource('dynamodb', region_name='eu-west-3')
-except errors.ServerSelectionTimeoutError as err:
-    # do whatever you need
-    print(err)
+dynamodb = boto3.resource('dynamodb', region_name='eu-west-3')

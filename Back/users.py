@@ -101,7 +101,6 @@ def delete_user(email):
     return Response(resp, status=200, mimetype='application/json')
 
 
-
 def find_user(email):
     user_found = table.query(
         KeyConditionExpression=Key('email').eq(email)

@@ -7,7 +7,7 @@ from flask import request, Response
 from boto3.dynamodb.conditions import Key
 from boto3 import client
 from werkzeug.security import generate_password_hash
-from flask_jwt_extended import jwt_required, create_access_token
+from flask_jwt_extended import jwt_required
 from PIL import Image
 import io
 import os
@@ -57,7 +57,7 @@ def photos():
     _sub_categories = _json.get('sub_categories')
     scan = {}
     if _categories:
-        scan['category'] = {'AttributeValueList': _categories,'ComparisonOperator': 'IN'}
+        scan['category'] = {'AttributeValueList': _categories, 'ComparisonOperator': 'IN'}
     if _destination:
         scan['destination'] = {'AttributeValueList': _destination, 'ComparisonOperator': 'IN'}
     if _categories:
