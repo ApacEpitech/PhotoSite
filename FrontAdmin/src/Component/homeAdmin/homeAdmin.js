@@ -231,7 +231,7 @@ export default class HomeAdmin extends React.Component {
                     <Content style={{margin: '24px 16px 0', overflow: 'initial'}}>
                         <div style={{padding: 24, background: '#fff', textAlign: 'center'}}>
                             <div>
-                                <h3 style={{textAlign: "left"}}>Tasks</h3>
+                                <h3 style={{textAlign: "left"}}>Photos</h3>
                             </div>
                             <div>
                                 <Select onChange={(values) => this.setDestinationFilter(values)}
