@@ -37,9 +37,11 @@ export default class HomeAdmin extends React.Component {
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
             axios.get('http://www.holy-driver.tools:4000/photos',
-                {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
+                {headers: {"Access-Control-Allow-Origin": "*"}}).then(async res => {
                     //TODO display images
-                console.debug(res);
+                console.log(res.data);
+                await this.setState({photos: res.data});
+                console.log(this.state.photos);
             }).catch(err => {
                 console.error(err);
             });
@@ -248,14 +250,14 @@ export default class HomeAdmin extends React.Component {
                                                                 cursor: "pointer"
                                                             }}
                                                             onClick={this.onDeletePhoto}
-                                                            id={photo._id.$oid}/>
+                                                            id={photo['PhotoID']}/>
                                                   }
                                             >
-                                                <p>{photo.content}</p>
+                                                <img alt={photo.description} src={photo.url}/>
                                                 <Icon type="edit"
                                                       style={{float: "left", fontSize: "20px", cursor: "pointer"}}
                                                       onClick={this.showModalEditTaskModal}
-                                                      id={photo._id.$oid}/>
+                                                      id={photo['PhotoID']}/>
                                             </Card>
                                         </Col>
                                     )
