@@ -1,6 +1,6 @@
 from app import *
 from json import dumps
-from flask import request, Response, jsonify
+from flask import request, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from boto3.dynamodb.conditions import Key
 from flask_jwt_extended import jwt_required, create_access_token

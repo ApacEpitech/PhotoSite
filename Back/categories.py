@@ -33,13 +33,18 @@ def categories():
     all_categories = table.scan(
         ScanFilter={}
     )['Items']
-    categoriesToReturn = []
+    categories_to_return = {}
     for cat in all_categories:
-        if cat['parent']:
-            categoriesToReturn[cat['parent']].append(cat['CategoryID'])
+        if 'parent' in cat:
+            if not int(cat.get('parent')) in categories_to_return:
+                categories_to_return[int(cat.get('parent'))] = {'title': '', 'sub_categories': []}
+            categories_to_return[int(cat.get('parent'))]['sub_categories'].append(int(cat['CategoryID']))
         else:
-            categoriesToReturn[cat['CategoryID']]['title'] = cat['title']
-    return Response(json.dumps(categoriesToReturn, cls=DecimalEncoder.DecimalEncoder), status=200,
+            if not int(cat['CategoryID']) in categories_to_return:
+                categories_to_return[int(cat['CategoryID'])] = {'title': cat.get('title'), 'sub_categories': []}
+            else:
+                categories_to_return[int(cat['CategoryID'])]['title'] = cat.get('title')
+    return Response(json.dumps(categories_to_return, cls=DecimalEncoder.DecimalEncoder), status=200,
                     mimetype='application/json')
 
 
