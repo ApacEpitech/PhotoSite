@@ -19,6 +19,8 @@ export default class HomeAdmin extends React.Component {
         destinationToAdd:[],
         subCategoryToAdd:[],
         categoryFilter: [],
+        sub_categoriesFilter: [],
+        sub_categories: [],
         categoryToAdd:[],
         load: true,
         addedFile: false,
@@ -37,11 +39,9 @@ export default class HomeAdmin extends React.Component {
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
             axios.get('http://www.holy-driver.tools:4000/photos',
-                {headers: {"Access-Control-Allow-Origin": "*"}}).then(async res => {
+                {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
                     //TODO display images
-                console.log(res.data);
-                await this.setState({photos: res.data});
-                console.log(this.state.photos);
+                this.setState({photos: res.data});
             }).catch(err => {
                 console.error(err);
             });
@@ -126,7 +126,21 @@ export default class HomeAdmin extends React.Component {
     };
 
 
-    setCategoryFilter = categoriesSelected => this.setState({categoriesSelected});
+    setCategoryFilter = categoriesSelected => {
+        this.setState({categoriesSelected});
+        let sub_categories = [];
+        for (let cat of categoriesSelected) {
+            for (let sub_cat of cat['sub_categories']) {
+                sub_categories.push(sub_cat);
+            }
+        }
+        this.setState({sub_categories});
+    };
+
+    setSubCategoryFilter = categoriesSelected => {
+        this.setState({categoriesSelected});
+    };
+
 
     setDestinationFilter = destinationsSelected => this.setState({destinationsSelected});
 
@@ -223,11 +237,20 @@ export default class HomeAdmin extends React.Component {
                                         labelField={'title'}
                                         loading={this.state.load}
                                         searchBy={'title'}
-                                        size={'small'}
                                         multi={true}
                                         valueField={'CategoryID'}
                                         clearable={true}
                                         values={this.state.categoryFilter}/>
+                                <Select onChange={(values) => this.setSubCategoryFilter(values)}
+                                        options={this.state.sub_categories}
+                                        labelField={'title'}
+                                        loading={this.state.load}
+                                        disabled={this.state.sub_categories.length === 0}
+                                        searchBy={'title'}
+                                        multi={true}
+                                        valueField={'CategoryID'}
+                                        clearable={true}
+                                        values={this.state.sub_categoriesFilter}/>
                             </div>
                             <div>
                                 <Icon type="plus" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
@@ -238,7 +261,7 @@ export default class HomeAdmin extends React.Component {
                             <Row>
                                 {
                                     this.state.photos.map(photo =>
-                                        <Col span={8}>
+                                        <Col span={8} key={photo['PhotoID']}>
                                             <Card bordered={true}
                                                   style={{width: 300, marginBottom: '2%'}}
                                                   title={photo.title} className={"Task"}
