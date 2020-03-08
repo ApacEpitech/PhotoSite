@@ -49,7 +49,7 @@ def add_photo():
         return bad_request('Destination, binary or category')
 
 
-@app.route('/photos', methods=['GET'])
+@app.route('/photos/filter', methods=['POST'])
 def photos():
     _json = request.json
     scan = {}
