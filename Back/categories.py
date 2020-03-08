@@ -33,17 +33,23 @@ def categories():
     all_categories = table.scan(
         ScanFilter={}
     )['Items']
-    categories_to_return = {}
+    categories_to_return = []
+    main_cat = {}
     for cat in all_categories:
         if 'parent' in cat:
-            if not int(cat.get('parent')) in categories_to_return:
-                categories_to_return[int(cat.get('parent'))] = {'title': '', 'sub_categories': []}
-            categories_to_return[int(cat.get('parent'))]['sub_categories'].append(int(cat['CategoryID']))
+            if not int(cat.get('parent')) in main_cat:
+                main_cat[int(cat.get('parent'))] = len(main_cat)
+                categories_to_return.append({'CategoryID': cat.get('parent'), 'title': 'AAA', 'sub_categories': []})
+            categories_to_return[main_cat[int(cat.get('parent'))]]['sub_categories'].append(
+                {'CategoryID': cat['CategoryID'], 'title': cat.get('title')})
         else:
-            if not int(cat['CategoryID']) in categories_to_return:
-                categories_to_return[int(cat['CategoryID'])] = {'title': cat.get('title'), 'sub_categories': []}
+            if not int(cat['CategoryID']) in main_cat:
+                main_cat[int(cat.get('CategoryID'))] = len(main_cat)
+                categories_to_return.append({'CategoryID': cat['CategoryID'],
+                                             'title': cat.get('title'),
+                                             'sub_categories': []})
             else:
-                categories_to_return[int(cat['CategoryID'])]['title'] = cat.get('title')
+                categories_to_return[main_cat[int(cat.get('CategoryID'))]]['title'] = cat['title']
     return Response(json.dumps(categories_to_return, cls=DecimalEncoder.DecimalEncoder), status=200,
                     mimetype='application/json')
 
@@ -60,7 +66,7 @@ def category(_id):
             ScanFilter={'parent': {'AttributeValueList': [int(_id)], 'ComparisonOperator': 'EQ'}}
         )['Items']
         for sub in sub_categories_found:
-            return_var['sub_categories'].append(sub.get('CategoryID'))
+            return_var['sub_categories'].append({'CategoryID': sub['CategoryID'], 'title': sub.get('title')})
     return Response(json.dumps(return_var, cls=DecimalEncoder.DecimalEncoder), status=200,
                     mimetype='application/json')
 
