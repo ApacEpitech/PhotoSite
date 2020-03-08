@@ -1,6 +1,7 @@
 from categories import *
 from photos import *
 from users import *
+from destinations import *
 
 
 @app.route('/')
