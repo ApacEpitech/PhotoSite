@@ -1,9 +1,8 @@
 import React from "react";
-import ReactDOM from 'react-dom'
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Form, Icon, Input, Button } from 'antd';
 import Cookies from 'js-cookie';
 
-import '../css/login.css';
+import './login.css';
 
 import 'antd/dist/antd.css';
 import axios from "axios";
@@ -38,43 +37,42 @@ class Login extends React.Component{
     };
 
     componentDidMount() {
-        Cookies.set('id', '');
+        Cookies.remove('id');
     }
 
     render() {
-
         const { getFieldDecorator } = this.props.form;
-
         return(
-
             <Form onSubmit={this.handleSubmit} className="login-form">
-             <Form.Item>
+                <h1 style={{textAlign: "center"}}>Interface administrateur</h1>
+                <Form.Item>
                  {getFieldDecorator('username', {
-                     rules: [{ required: true, message: 'Please input your username!' }],
+                     rules: [{ required: true, message: 'Merci de rentrer votre adresse email' }],
                  })(
                      <Input
                          prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                         placeholder="Username"
+                         placeholder="Adresse email"
                      />,
                  )}
              </Form.Item>
              <Form.Item>
                  {getFieldDecorator('password', {
-                     rules: [{ required: true, message: 'Please input your Password!' }],
+                     rules: [{ required: true, message: 'Merci de saisir un mot de passe' }],
                  })(
                      <Input
                          prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
                          type="password"
-                         placeholder="Password"
+                         placeholder="Mot de passe"
                      />,
                  )}
              </Form.Item>
              <Form.Item>
                  <Button type="primary" htmlType="submit" className="login-form-button">
-                     Log in
+                     Se connecter
                  </Button>
              </Form.Item>
-         </Form>)
+         </Form>
+        )
     }
 }
 

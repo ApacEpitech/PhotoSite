@@ -1,12 +1,12 @@
 import React from "react";
-import {Checkbox, Icon, Layout, Menu, Card, Col, Row, Modal, Form, Input, Button} from 'antd';
+import {Checkbox, Icon, Layout, Menu, Card, Col, Row, Modal, Form, Input} from 'antd';
 import axios from 'axios';
 
 import 'antd/dist/antd.css';
 import {Link} from "react-router-dom";
 import Cookies from "js-cookie";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 export default class Users extends React.Component{
 
