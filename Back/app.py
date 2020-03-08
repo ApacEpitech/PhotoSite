@@ -25,7 +25,7 @@ def not_found(url):
 def bad_request(missing):
     message = {
         'status': 400,
-        'message': 'Not Found: ' + missing,
+        'message': 'Not Found: ' + str(missing),
     }
     resp = dumps(message)
     return Response(resp, status=400, mimetype='application/json')

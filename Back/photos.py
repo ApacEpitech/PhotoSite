@@ -61,7 +61,7 @@ def photos():
             scan['category'] = {'AttributeValueList': _categories, 'ComparisonOperator': 'IN'}
         if _destination:
             scan['destination'] = {'AttributeValueList': _destination, 'ComparisonOperator': 'IN'}
-        if _categories:
+        if _sub_categories:
             scan['sub_category'] = {'AttributeValueList': _sub_categories, 'ComparisonOperator': 'IN'}
     all_photos = table.scan(
         ScanFilter=scan
