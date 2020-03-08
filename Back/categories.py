@@ -50,8 +50,18 @@ def categories():
 
 @app.route('/categories/<_id>', methods=['GET'])
 def category(_id):
+    return_var = {}
     category_found = find_category(_id)
-    return Response(json.dumps(category_found, cls=DecimalEncoder.DecimalEncoder), status=200,
+    if category_found:
+        category_found = category_found[0]
+        return_var['title'] = category_found.get('title')
+        return_var['sub_categories'] = []
+        sub_categories_found = table.scan(
+            ScanFilter={'parent': {'AttributeValueList': [int(_id)], 'ComparisonOperator': 'EQ'}}
+        )['Items']
+        for sub in sub_categories_found:
+            return_var['sub_categories'].append(sub.get('CategoryID'))
+    return Response(json.dumps(return_var, cls=DecimalEncoder.DecimalEncoder), status=200,
                     mimetype='application/json')
 
 
@@ -90,7 +100,7 @@ def delete_category(_id):
 def find_category(category_id):
     category_found = table.query(
         KeyConditionExpression=Key('CategoryID').eq(int(category_id))
-    )
+    )['Items']
     return category_found
 
 
