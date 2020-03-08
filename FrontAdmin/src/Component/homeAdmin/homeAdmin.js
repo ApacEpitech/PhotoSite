@@ -40,7 +40,6 @@ export default class HomeAdmin extends React.Component {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
             axios.get('http://www.holy-driver.tools:4000/photos',
                 {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
-                    //TODO display images
                 this.setState({photos: res.data});
             }).catch(err => {
                 console.error(err);
@@ -135,6 +134,19 @@ export default class HomeAdmin extends React.Component {
             }
         }
         this.setState({sub_categories});
+
+        let cat_id = [];
+        for (let cat of categoriesSelected) {
+            cat_id.push(cat['CategoryID']);
+        }
+
+        axios.get('http://www.holy-driver.tools:4000/photos',
+            {headers: {"Access-Control-Allow-Origin": "*"}, data: {"categories" : cat_id }}).then(res => {
+            this.setState({photos: res.data});
+            console.log(res);
+        }).catch(err => {
+            console.error(err);
+        });
     };
 
     setSubCategoryFilter = categoriesSelected => {
@@ -276,9 +288,9 @@ export default class HomeAdmin extends React.Component {
                                                             id={photo['PhotoID']}/>
                                                   }
                                             >
-                                                <img alt={photo.description} src={photo.url}/>
+                                                <img alt={photo.description} src={photo.url} style={{width: '100%', marginBottom:'6px'}}/>
                                                 <Icon type="edit"
-                                                      style={{float: "left", fontSize: "20px", cursor: "pointer"}}
+                                                      style={{float: "right", fontSize: "20px", cursor: "pointer"}}
                                                       onClick={this.showModalEditTaskModal}
                                                       id={photo['PhotoID']}/>
                                             </Card>
