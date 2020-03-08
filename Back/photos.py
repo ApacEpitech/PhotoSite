@@ -32,7 +32,7 @@ def add_photo():
         # save details
         image = Image.open(io.BytesIO(_binary.decode()))
         filename, file_extension = os.path.splitext(_title)
-        _hashed_title = generate_password_hash(filename) + file_extension
+        _hashed_title = str(hash(filename)) + file_extension
         cli.upload_file(image, bucket, _hashed_title)
 
         item = {
@@ -80,6 +80,7 @@ def photo(_id):
 def update_photo():
     _json = request.json
     _category = _json.get('category')
+    _sub_category = _json.get('sub_category')
     _destination = _json.get('destination')
     _description = _json.get('description')
     _id = _json.get('PhotoID')
@@ -88,10 +89,11 @@ def update_photo():
         # save edits
         table.update_item(
             Key={'PhotoID': decimal.Decimal(_id)},
-            UpdateExpression="set destination = :dest, description=:desc, category=:categ",
+            UpdateExpression="set destination = :dest, description=:desc, category=:categ, sub_category = :sub_cat",
             ExpressionAttributeValues={
                 ':dest': decimal.Decimal(_destination),
                 ':desc': _description,
+                'sub_cat': decimal.Decimal(_sub_category),
                 ':categ': decimal.Decimal(_category)
             },
             ReturnValues="UPDATED_NEW"
