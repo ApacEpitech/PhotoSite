@@ -38,20 +38,17 @@ export default class HomeAdmin extends React.Component {
 
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
-            axios.get('http://www.holy-driver.tools:4000/photos',
-                {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
+            axios.get('http://www.holy-driver.tools:4000/photos').then(res => {
                 this.setState({photos: res.data});
             }).catch(err => {
                 console.error(err);
             });
-            axios.get('http://www.holy-driver.tools:4000/categories',
-                {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
+            axios.get('http://www.holy-driver.tools:4000/categories').then(res => {
                 this.setState({allCategories: res.data});
             }).catch(err => {
                 console.error(err);
             });
-            axios.get('http://www.holy-driver.tools:4000/destinations',
-                {headers: {"Access-Control-Allow-Origin": "*"}}).then(res => {
+            axios.get('http://www.holy-driver.tools:4000/destinations').then(res => {
                 this.setState({allDestinations: res.data});
                 this.setState({load: false});
             }).catch(err => {
@@ -139,9 +136,11 @@ export default class HomeAdmin extends React.Component {
         for (let cat of categoriesSelected) {
             cat_id.push(cat['CategoryID']);
         }
+        const body = {
+            "categories" : cat_id
+        };
 
-        axios.get('http://www.holy-driver.tools:4000/photos',
-            {headers: {"Access-Control-Allow-Origin": "*"}, data: {"categories" : cat_id }}).then(res => {
+        axios.post('http://www.holy-driver.tools:4000/photos/filter', body).then(res => {
             this.setState({photos: res.data});
             console.log(res);
         }).catch(err => {
