@@ -49,6 +49,14 @@ def add_photo():
         return bad_request('Destination, binary or category')
 
 
+@app.route('/photos', methods=['GET'])
+def get_all_photos():
+    all_photos = table.scan(
+        ScanFilter={}
+    )['Items']
+    return Response(json.dumps(all_photos, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
+
+
 @app.route('/photos/filter', methods=['POST'])
 def photos():
     _json = request.json
