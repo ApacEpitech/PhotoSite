@@ -1,12 +1,12 @@
 import React from "react";
-import {Checkbox, Icon, Layout, Menu, Card, Col, Row, Modal, Form, Input, Button} from 'antd';
+import {Checkbox, Icon, Layout, Menu, Card, Col, Row, Modal, Form, Input} from 'antd';
 import axios from 'axios';
 
 import 'antd/dist/antd.css';
 import {Link} from "react-router-dom";
 import Cookies from "js-cookie";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 
 export default class Users extends React.Component{
 
@@ -23,7 +23,7 @@ export default class Users extends React.Component{
 
     componentDidMount() {
         if (Cookies.get('id') !== undefined && Cookies.get('id') !== "") {
-            axios.get('http://localhost:5000/users/' + Cookies.get('id'),{ headers: {"Access-Control-Allow-Origin": "*"}})
+            axios.get('http://www.holy-driver.tools:4000/users/' + Cookies.get('id'),{ headers: {"Access-Control-Allow-Origin": "*"}})
                 .then(res => {
                     console.log(res.data);
                     const users = res.data;
@@ -35,7 +35,7 @@ export default class Users extends React.Component{
         } else {
             window.location = 'login';
         }
-        axios.get('http://localhost:5000/users',{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.get('http://www.holy-driver.tools:4000/users',{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 const users = res.data;
@@ -59,7 +59,7 @@ export default class Users extends React.Component{
                     'password': document.getElementById('NewUserPassword').value
                 };
                 console.log(user);
-                axios.post(`http://localhost:5000/users`, user)
+                axios.post(`http://www.holy-driver.tools:4000/users`, user)
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -90,7 +90,7 @@ export default class Users extends React.Component{
     // Part Edit User
     showModalEditUserModal = e =>{
         console.log(e);
-        axios.get('http://localhost:5000/users/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.get('http://www.holy-driver.tools:4000/users/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 const user = res.data;
@@ -114,7 +114,7 @@ export default class Users extends React.Component{
                     'administrator': this.selectedUserEdit.administrator
                 };
                 console.log(JSON.stringify(user));
-                axios.put(`http://localhost:5000/users`, user)
+                axios.put(`http://www.holy-driver.tools:4000/users`, user)
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -149,7 +149,7 @@ export default class Users extends React.Component{
     }
 
     onChangeStateBan(e) {
-        axios.get('http://localhost:5000/users/'+e.target.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.get('http://www.holy-driver.tools:4000/users/'+e.target.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 console.log(res.data);
                 const user = res.data;
@@ -161,7 +161,7 @@ export default class Users extends React.Component{
                     'administrator': user.administrator
                 };
                 console.log(JSON.stringify(userData));
-                axios.put(`http://localhost:5000/users`, userData)
+                axios.put(`http://www.holy-driver.tools:4000/users`, userData)
                     .then(res => {
                         console.log(res);
                         console.log(res.data);
@@ -171,7 +171,7 @@ export default class Users extends React.Component{
     }
 
     onDeleteUser = e => {
-        axios.delete('http://localhost:5000/users/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
+        axios.delete('http://www.holy-driver.tools:4000/users/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 window.location.reload();
             });

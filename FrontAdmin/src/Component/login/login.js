@@ -1,9 +1,8 @@
 import React from "react";
-import ReactDOM from 'react-dom'
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Form, Icon, Input, Button } from 'antd';
 import Cookies from 'js-cookie';
 
-import '../css/login.css';
+import './login.css';
 
 import 'antd/dist/antd.css';
 import axios from "axios";
@@ -15,78 +14,65 @@ class Login extends React.Component{
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const user = {
-                    'mail': values.username ,
+                    'email': values.username ,
                     'password': values.password
                 };
-                axios.post('http://localhost:5000/users/connect',user, { headers: {"Access-Control-Allow-Origin": "*"}})
+                axios.post('http://www.holy-driver.tools:4000/users/connect',user, { headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
-                        console.log(res.data);
-                        const user = res.data;
-                        if (user.status === undefined) {
-                            if (user.banned) {
-                                alert("You are banned!");
-                            }
-                            else if (user.administrator) {
-                                Cookies.set('id', user._id.$oid);
-                                window.location = './homeAdmin?show=All';
-                            } else {
-                                Cookies.set('id', user._id.$oid);
-
-                                window.location = './home?show=All';
-                            }
+                        if (res.status === 200) {
+                            const token = res.data['access_token'];
+                            Cookies.set('jwt', token);
+                            window.location = './homeAdmin';
                         } else {
                             alert("Email Or Password Incorrect")
                         }
-
                     })
                     .catch(error => {
                         console.log(error);
                         alert("Email Or Password Incorrect")
 
                     });
-                console.log('Received values of form: ', values);
             }
         });
     };
 
     componentDidMount() {
-        Cookies.set('id', '');
+        Cookies.remove('id');
     }
 
     render() {
-
         const { getFieldDecorator } = this.props.form;
-
         return(
-
             <Form onSubmit={this.handleSubmit} className="login-form">
-             <Form.Item>
+                <h1 style={{textAlign: "center"}}>Interface administrateur</h1>
+                <Form.Item>
                  {getFieldDecorator('username', {
-                     rules: [{ required: true, message: 'Please input your username!' }],
+                     rules: [{ required: true, message: 'Merci de rentrer votre adresse email' }],
                  })(
                      <Input
                          prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                         placeholder="Username"
+                         placeholder="Adresse email"
                      />,
                  )}
              </Form.Item>
              <Form.Item>
                  {getFieldDecorator('password', {
-                     rules: [{ required: true, message: 'Please input your Password!' }],
+                     rules: [{ required: true, message: 'Merci de saisir un mot de passe' }],
                  })(
                      <Input
                          prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
                          type="password"
-                         placeholder="Password"
+                         placeholder="Mot de passe"
                      />,
                  )}
              </Form.Item>
              <Form.Item>
                  <Button type="primary" htmlType="submit" className="login-form-button">
-                     Log in
+                     Se connecter
                  </Button>
              </Form.Item>
-         </Form>)
+         </Form>
+        )
     }
 }
 
