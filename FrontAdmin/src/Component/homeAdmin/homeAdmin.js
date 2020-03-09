@@ -6,6 +6,8 @@ import {Link} from "react-router-dom";
 import axios from "axios";
 import Cookies from 'js-cookie';
 import Select from "react-dropdown-select";
+import 'react-toastify/dist/ReactToastify.min.css';
+import {toast} from "react-toastify";
 
 const {Content, Footer, Sider} = Layout;
 
@@ -21,18 +23,16 @@ export default class HomeAdmin extends React.Component {
         categoryFilter: [],
         sub_categoriesFilter: [],
         sub_categories: [],
+        sub_categories_to_add: [],
         categoryToAdd: [],
         load: true,
         addedFile: false,
         categChosen: false,
-        destChosen: false
+        destChosen: false,
+        visibleNewPhoto: false
     };
 
-    stateNewTaskModal = {visible: false};
-    stateEditTaskModal = {visible: false};
-
     selectedTasksEdit;
-    selectedUser;
 
     //, "Authorization": 'Bearer ' + Cookies.get('jwt')}
 
@@ -61,43 +61,35 @@ export default class HomeAdmin extends React.Component {
 
     // Part add Task
     showModalNewTaskModal = () => {
-        this.stateNewTaskModal.visible = true;
-        this.selectedUser = -1;
-        this.selectedUser = -1;
         this.setState({
-            visible: true,
+            visibleNewPhoto: true,
         });
     };
 
     handleOkNewTaskModal = () => {
-        if (document.getElementById('NewImageDesc').value !== "") {
-            if (this.selectedUser !== -1) {
-                const photo = {
-                    'category': this.state.destinationToAdd[0]['CategoryID'],
-                    'sub_category': this.state.subCategoryToAdd[0]['CategoryID'],
-                    'destination': this.state.destinationToAdd[0]['DestinationID'],
-                    'description': document.getElementById('NewImageDesc').value,
-                    'title': this.state.fileName,
-                    'binary': this.state.fileBin
-                };
-                axios.post(`http://www.holy-driver.tools:4000/photos`, photo)
-                    .then(res => {
-                        this.stateNewUserModal.visible = false;
-                    });
-            } else {
-                alert("");
-            }
-        } else {
-            alert("Please enter title");
-
+        if (document.getElementById('NewImageDesc').value === "") {
+            alert("Merci de rentrer un titre");
+            return;
         }
+        const photo = {
+            'category':  this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
+            'destination': this.state.destinationToAdd[0]['DestinationID'],
+            'description': document.getElementById('NewImageDesc').value,
+            'title': this.state.fileName,
+            'binary': this.state.fileBin
+        };
+        axios.post(`http://www.holy-driver.tools:4000/photos`, photo, {headers: {"Authorization": 'Bearer ' + Cookies.get('jwt')}})
+            .then(async res => {
+                this.state.photos.push(res.data);
+                await this.setState({'visibleNewPhoto': false});
+                toast.info("Photo ajoutée");
+            }).catch(err => {
+                console.error(err);
+        });
     };
 
     handleCancelNewTaskModal = e => {
-        this.stateNewTaskModal.visible = false;
-        this.setState({
-            visible: false,
-        });
+        this.setState({'visibleNewPhoto': false});
     };
 
     // Part Edit Task
@@ -107,8 +99,8 @@ export default class HomeAdmin extends React.Component {
                 const photo = res.data;
                 this.selectedTasksEdit = photo;
                 this.stateEditTaskModal.visible = true;
-                this.selectedUser = photo.user_id;
-                axios.get('http://www.holy-driver.tools:4000/users/' + this.selectedUser, {headers: {"Access-Control-Allow-Origin": "*"}})
+                this.selectedPhoto = photo['PhotoID'];
+                axios.get('http://www.holy-driver.tools:4000/photos/' + this.selectedPhoto, {headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
                         const user = res.data;
                         this.setState({
@@ -123,9 +115,6 @@ export default class HomeAdmin extends React.Component {
 
 
     create_body() {
-        console.log(this.state.sub_categoriesFilter);
-        console.log(this.state.categoryFilter);
-        console.log(this.state.destinationFilter);
         // CATEGORIES
         let cat_id = [];
         if (this.state.sub_categoriesFilter.length > 0) {
@@ -175,17 +164,15 @@ export default class HomeAdmin extends React.Component {
     };
 
     setSubCategoryFilter = async categoriesSelected => {
-        await this.setState({sub_categoriesFilter : categoriesSelected});
+        await this.setState({sub_categoriesFilter: categoriesSelected});
         this.update_photo_list();
     };
 
 
     update_photo_list() {
         let body = this.create_body();
-        console.log(body);
         axios.post('http://www.holy-driver.tools:4000/photos/filter', body).then(res => {
             this.setState({photos: res.data});
-            console.log(res);
         }).catch(err => {
             console.error(err);
         });
@@ -199,10 +186,24 @@ export default class HomeAdmin extends React.Component {
     setCategoryAdd = async categoryToAdd => {
         if (categoryToAdd.length > 0) {
             await this.setState({categChosen: true});
+            await this.setState({sub_categories_to_add: categoryToAdd[0]['sub_categories']});
+            let sub_cat_new = [];
+            for (let sub_cat_av of this.state.subCategoryToAdd) {
+                if (this.state.sub_categories_to_add.includes(sub_cat_av)) {
+                    sub_cat_new.push(sub_cat_av);
+                }
+            }
+            await this.setState({subCategoryToAdd: sub_cat_new});
         } else {
             await this.setState({categChosen: false});
+            await this.setState({sub_categories_to_add: []});
+            await this.setState({subCategoryToAdd: []});
         }
-        this.setState({categoryToAdd});
+        await this.setState({categoryToAdd});
+    };
+
+    setSubCategoryAdd = async subCategoryToAdd => {
+        this.setState({subCategoryToAdd: subCategoryToAdd});
     };
 
     setDestinationAdd = async destinationToAdd => {
@@ -230,10 +231,8 @@ export default class HomeAdmin extends React.Component {
     };
 
     onDeletePhoto = e => {
-        console.log(e.target);
         axios.delete('http://www.holy-driver.tools:4000/photos/' + e.currentTarget.id, {headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
-                console.log(res.data);
                 window.location.reload();
             });
     };
@@ -316,7 +315,7 @@ export default class HomeAdmin extends React.Component {
                                         <Col span={8} key={photo['PhotoID']}>
                                             <Card bordered={true}
                                                   style={{width: 300, marginBottom: '2%'}}
-                                                  title={photo.title} className={"Task"}
+                                                  title={photo.description} className={"Task"}
                                                   extra={
                                                       <Icon type="close"
                                                             style={{
@@ -343,7 +342,7 @@ export default class HomeAdmin extends React.Component {
 
                         <Modal
                             title="Ajouter une image"
-                            visible={this.stateNewTaskModal.visible}
+                            visible={this.state.visibleNewPhoto}
                             onOk={this.handleOkNewTaskModal}
                             onCancel={this.handleCancelNewTaskModal}
                             cancelText="Annuler"
@@ -372,6 +371,16 @@ export default class HomeAdmin extends React.Component {
                                             searchBy={'title'}
                                             valueField={'CategoryID'}
                                             values={this.state.categoryToAdd}/>
+                                </Form.Item>
+                                <Form.Item>
+                                    <Select onChange={(value) => this.setSubCategoryAdd(value)}
+                                            options={this.state.sub_categories_to_add}
+                                            disabled={this.state.sub_categories_to_add.length === 0}
+                                            labelField={'title'}
+                                            loading={this.state.load}
+                                            searchBy={'title'}
+                                            valueField={'CategoryID'}
+                                            values={this.state.subCategoryToAdd}/>
                                 </Form.Item>
                                 <Form.Item>
                                     <input id="upload" type="file" name="file" onChange={this.addFile}/>

@@ -3,12 +3,15 @@ import './App.css';
 import Login from './Component/login/login';
 import Home from './Component/homeAdmin/homeAdmin';
 import Users from './Component/users';
+import { toast } from 'react-toastify';
 
 import {
     BrowserRouter as Router,
     Switch,
     Route
 } from "react-router-dom";
+
+toast.configure();
 
 function App() {
   return (
