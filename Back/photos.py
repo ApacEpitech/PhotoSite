@@ -87,25 +87,22 @@ def photo(_id):
     return Response(json.dumps(photo_found, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/photos', methods=['PUT'])
+@app.route('/photo/<_id>', methods=['PUT'])
 @jwt_required
-def update_photo():
+def update_photo(_id):
     _json = request.json
     _category = _json.get('category')
-    _sub_category = _json.get('sub_category')
     _destination = _json.get('destination')
     _description = _json.get('description')
-    _id = _json.get('PhotoID')
     # validate the received values
-    if _id and _category and _destination and _description:
+    if _category and _destination and _description:
         # save edits
         table.update_item(
             Key={'PhotoID': decimal.Decimal(_id)},
-            UpdateExpression="set destination = :dest, description=:desc, category=:categ, sub_category = :sub_cat",
+            UpdateExpression="set destination = :dest, description=:desc, category=:categ",
             ExpressionAttributeValues={
                 ':dest': decimal.Decimal(_destination),
                 ':desc': _description,
-                'sub_cat': decimal.Decimal(_sub_category),
                 ':categ': decimal.Decimal(_category)
             },
             ReturnValues="UPDATED_NEW"
