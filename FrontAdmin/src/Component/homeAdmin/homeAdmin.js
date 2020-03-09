@@ -16,12 +16,12 @@ export default class HomeAdmin extends React.Component {
         allCategories: [],
         allDestinations: [],
         destinationFilter: [],
-        destinationToAdd:[],
-        subCategoryToAdd:[],
+        destinationToAdd: [],
+        subCategoryToAdd: [],
         categoryFilter: [],
         sub_categoriesFilter: [],
         sub_categories: [],
-        categoryToAdd:[],
+        categoryToAdd: [],
         load: true,
         addedFile: false,
         categChosen: false,
@@ -122,38 +122,79 @@ export default class HomeAdmin extends React.Component {
     };
 
 
-    setCategoryFilter = categoriesSelected => {
-        this.setState({categoriesSelected});
+    create_body() {
+        console.log(this.state.sub_categoriesFilter);
+        console.log(this.state.categoryFilter);
+        console.log(this.state.destinationFilter);
+        // CATEGORIES
+        let cat_id = [];
+        if (this.state.sub_categoriesFilter.length > 0) {
+            for (let cat of this.state.sub_categoriesFilter) {
+                cat_id.push(cat['CategoryID']);
+            }
+        } else {
+            for (let cat of this.state.categoryFilter) {
+                cat_id.push(cat['CategoryID']);
+                for (let sub_cat of cat['sub_categories']) {
+                    cat_id.push(sub_cat['CategoryID']);
+                }
+            }
+        }
+
+        // DESTINATIONS
+        let dest_id = [];
+        for (let dest of this.state.destinationFilter) {
+            dest_id.push(dest['DestinationID']);
+        }
+
+        // CREATION BODY
+        const body = {};
+        body.categories = cat_id;
+        body.destinations = dest_id;
+        return body;
+    }
+
+    setCategoryFilter = async categoriesSelected => {
+        await this.setState({categoryFilter: categoriesSelected});
         let sub_categories = [];
         for (let cat of categoriesSelected) {
             for (let sub_cat of cat['sub_categories']) {
                 sub_categories.push(sub_cat);
             }
         }
-        this.setState({sub_categories});
-
-        let cat_id = [];
-        for (let cat of categoriesSelected) {
-            cat_id.push(cat['CategoryID']);
+        await this.setState({sub_categories});
+        let sub_cat_new = [];
+        for (let sub_cat_av of this.state.sub_categories) {
+            if (this.state.sub_categoriesFilter.includes(sub_cat_av)) {
+                sub_cat_new.push(sub_cat_av);
+            }
         }
-        const body = {
-            "categories" : cat_id
-        };
+        await this.setState({sub_categoriesFilter: sub_cat_new});
+        this.update_photo_list();
 
+    };
+
+    setSubCategoryFilter = async categoriesSelected => {
+        await this.setState({sub_categoriesFilter : categoriesSelected});
+        this.update_photo_list();
+    };
+
+
+    update_photo_list() {
+        let body = this.create_body();
+        console.log(body);
         axios.post('http://www.holy-driver.tools:4000/photos/filter', body).then(res => {
             this.setState({photos: res.data});
             console.log(res);
         }).catch(err => {
             console.error(err);
         });
+    }
+
+    setDestinationFilter = async destinationsSelected => {
+        await this.setState({destinationFilter: destinationsSelected});
+        this.update_photo_list();
     };
-
-    setSubCategoryFilter = categoriesSelected => {
-        this.setState({categoriesSelected});
-    };
-
-
-    setDestinationFilter = destinationsSelected => this.setState({destinationsSelected});
 
     setCategoryAdd = async categoryToAdd => {
         if (categoryToAdd.length > 0) {
@@ -240,7 +281,7 @@ export default class HomeAdmin extends React.Component {
                                         loading={this.state.load}
                                         searchBy={'name'}
                                         multi={true}
-                                        valueField={'id'}
+                                        valueField={'DestinationID'}
                                         clearable={true}
                                         values={this.state.destinationFilter}/>
                                 <Select onChange={(values) => this.setCategoryFilter(values)}
@@ -287,7 +328,8 @@ export default class HomeAdmin extends React.Component {
                                                             id={photo['PhotoID']}/>
                                                   }
                                             >
-                                                <img alt={photo.description} src={photo.url} style={{width: '100%', marginBottom:'6px'}}/>
+                                                <img alt={photo.description} src={photo.url}
+                                                     style={{width: '100%', marginBottom: '6px'}}/>
                                                 <Icon type="edit"
                                                       style={{float: "right", fontSize: "20px", cursor: "pointer"}}
                                                       onClick={this.showModalEditTaskModal}
@@ -337,7 +379,7 @@ export default class HomeAdmin extends React.Component {
                             </Form>
                         </Modal>
                     </Content>
-                    <Footer style={{ textAlign: 'center', position: "sticky", bottom: "0"}}>
+                    <Footer style={{textAlign: 'center', position: "sticky", bottom: "0"}}>
                         Designed By CUEVAS Alexandre
                     </Footer>
                 </Layout>
