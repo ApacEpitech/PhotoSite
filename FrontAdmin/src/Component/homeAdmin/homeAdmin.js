@@ -29,10 +29,11 @@ export default class HomeAdmin extends React.Component {
         addedFile: false,
         categChosen: false,
         destChosen: false,
-        visibleNewPhoto: false
+        visibleNewPhoto: false,
+        uploadDone: true
     };
 
-    selectedTasksEdit;
+    selectedPhotosEdit;
 
     //, "Authorization": 'Bearer ' + Cookies.get('jwt')}
 
@@ -59,18 +60,19 @@ export default class HomeAdmin extends React.Component {
         }
     }
 
-    // Part add Task
-    showModalNewTaskModal = () => {
+    // Part add Photo
+    showModalNewPhotoModal = () => {
         this.setState({
             visibleNewPhoto: true,
         });
     };
 
-    handleOkNewTaskModal = () => {
+    handleOkNewPhotoModal = async () => {
         if (document.getElementById('NewImageDesc').value === "") {
             alert("Merci de rentrer un titre");
             return;
         }
+        this.setState({uploadDone : false});
         const photo = {
             'category':  this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
             'destination': this.state.destinationToAdd[0]['DestinationID'],
@@ -85,20 +87,22 @@ export default class HomeAdmin extends React.Component {
                 toast.info("Photo ajoutée");
             }).catch(err => {
                 console.error(err);
+                toast.error("Erreur lors de l'ajout");
         });
+        this.setState({uploadDone : false});
     };
 
-    handleCancelNewTaskModal = e => {
+    handleCancelNewPhotoModal = e => {
         this.setState({'visibleNewPhoto': false});
     };
 
-    // Part Edit Task
-    showModalEditTaskModal = e => {
+    // Part Edit Photo
+    showModalEditPhotoModal = e => {
         axios.get('http://www.holy-driver.tools:4000/photos/' + e.currentTarget.id, {headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
                 const photo = res.data;
-                this.selectedTasksEdit = photo;
-                this.stateEditTaskModal.visible = true;
+                this.selectedPhotosEdit = photo;
+                this.stateEditPhotoModal.visible = true;
                 this.selectedPhoto = photo['PhotoID'];
                 axios.get('http://www.holy-driver.tools:4000/photos/' + this.selectedPhoto, {headers: {"Access-Control-Allow-Origin": "*"}})
                     .then(res => {
@@ -305,7 +309,7 @@ export default class HomeAdmin extends React.Component {
                             </div>
                             <div>
                                 <Icon type="plus" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                                      onClick={this.showModalNewTaskModal}/>
+                                      onClick={this.showModalNewPhotoModal}/>
                             </div>
                             <br/>
 
@@ -315,7 +319,7 @@ export default class HomeAdmin extends React.Component {
                                         <Col span={8} key={photo['PhotoID']}>
                                             <Card bordered={true}
                                                   style={{width: 300, marginBottom: '2%'}}
-                                                  title={photo.description} className={"Task"}
+                                                  title={photo.description} className={"Photo"}
                                                   extra={
                                                       <Icon type="close"
                                                             style={{
@@ -331,7 +335,7 @@ export default class HomeAdmin extends React.Component {
                                                      style={{width: '100%', marginBottom: '6px'}}/>
                                                 <Icon type="edit"
                                                       style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                                                      onClick={this.showModalEditTaskModal}
+                                                      onClick={this.showModalEditPhotoModal}
                                                       id={photo['PhotoID']}/>
                                             </Card>
                                         </Col>
@@ -343,8 +347,8 @@ export default class HomeAdmin extends React.Component {
                         <Modal
                             title="Ajouter une image"
                             visible={this.state.visibleNewPhoto}
-                            onOk={this.handleOkNewTaskModal}
-                            onCancel={this.handleCancelNewTaskModal}
+                            onOk={this.handleOkNewPhotoModal}
+                            onCancel={this.handleCancelNewPhotoModal}
                             cancelText="Annuler"
                             okButtonProps={{disabled: (!this.state.addedFile || !this.state.categChosen || !this.state.destChosen)}}
                             okText={'Ajouter'}>
@@ -385,6 +389,11 @@ export default class HomeAdmin extends React.Component {
                                 <Form.Item>
                                     <input id="upload" type="file" name="file" onChange={this.addFile}/>
                                 </Form.Item>
+                                <div style={{textAlign: "center"}}>
+                                    <img alt="Loading" src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
+                                         hidden={this.state.uploadDone}
+                                         width={"10%"}/>
+                                </div>
                             </Form>
                         </Modal>
                     </Content>
