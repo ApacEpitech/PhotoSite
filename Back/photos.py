@@ -6,15 +6,23 @@ from app import *
 from flask import request, Response
 from boto3.dynamodb.conditions import Key
 from boto3 import client
-from werkzeug.security import generate_password_hash
 from flask_jwt_extended import jwt_required
 from PIL import Image
 import io
 import os
+import base64
 
 table = dynamodb.Table('Photos')
 bucket = "apacphotosite"
 cli = client('s3', region_name='eu-west-3')
+
+
+def decode_img(msg):
+    msg = msg.split(",", 1)[1]
+    msg = base64.b64decode(msg)
+    buf = io.BytesIO(msg)
+    img = Image.open(buf)
+    return img
 
 
 @app.route('/photos', methods=['POST'])
@@ -22,31 +30,27 @@ cli = client('s3', region_name='eu-west-3')
 def add_photo():
     _json = request.json
     _category = _json.get('category')
-    _sub_category = _json.get('sub_category')
     _destination = _json.get('destination')
     _description = _json.get('description')
     _title = _json.get('title')
     _binary = _json.get('binary')
     # validate the received values
-    if _destination and _category and _binary and _title:
-        # save details
-        image = Image.open(io.BytesIO(_binary.decode()))
-        filename, file_extension = os.path.splitext(_title)
-        _hashed_title = str(hash(filename)) + file_extension
-        cli.upload_file(image, bucket, _hashed_title)
-
-        item = {
-            'PhotoID': decimal.Decimal(max_id() + 1),
-            'category': _category,
-            'sub_category': _sub_category,
-            'destination': _destination,
-            'description': _description,
-            'url': "http://s3-eu-west-3.amazonaws.com/apacphotosite/" + _hashed_title
-        }
-        table.put_item(Item=item)
-        return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
-    else:
-        return bad_request('Destination, binary or category')
+    # save details
+    image = decode_img(_binary)
+    filename, file_extension = os.path.splitext(_title)
+    _hashed_title = str(hash(filename)) + file_extension
+    image.save(_hashed_title)
+    cli.upload_file(_hashed_title, bucket, _hashed_title)
+    os.remove(_hashed_title)
+    item = {
+        'PhotoID': decimal.Decimal(max_id() + 1),
+        'category': _category,
+        'destination': _destination,
+        'description': _description,
+        'url': "http://s3-eu-west-3.amazonaws.com/apacphotosite/" + _hashed_title
+    }
+    table.put_item(Item=item)
+    return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
 
 
 @app.route('/photos', methods=['GET'])
