@@ -15,21 +15,27 @@ export default class HomeAdmin extends React.Component {
 
     state = {
         photos: [],
+        photoToUpdate: {},
         allCategories: [],
         allDestinations: [],
         destinationFilter: [],
         destinationToAdd: [],
+        destinationToUpdate: [],
         subCategoryToAdd: [],
+        subCategoryToUpdate: [],
         categoryFilter: [],
         sub_categoriesFilter: [],
         sub_categories: [],
         sub_categories_to_add: [],
+        sub_categories_to_update: [],
         categoryToAdd: [],
+        categoryToUpdate: [],
         load: true,
         addedFile: false,
         categChosen: false,
         destChosen: false,
         visibleNewPhoto: false,
+        visibleUpdatePhoto: false,
         uploadDone: true
     };
 
@@ -82,7 +88,6 @@ export default class HomeAdmin extends React.Component {
             'title': this.state.fileName,
             'binary': this.state.fileBin
         };
-        console.log(this.header);
         axios.post(`http://www.holy-driver.tools:4000/photos`, photo, this.header)
             .then(async res => {
                 this.state.photos.push(res.data);
@@ -95,29 +100,80 @@ export default class HomeAdmin extends React.Component {
         this.setState({uploadDone: true});
     };
 
+    handleOkUpdatePhotoModal = async () => {
+        if (document.getElementById('NewImageDesc').value === "") {
+            alert("Merci de rentrer un titre");
+            return;
+        }
+        this.setState({uploadDone: false});
+        const photo = {
+            'category': this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
+            'destination': this.state.destinationToAdd[0]['DestinationID'],
+            'description': document.getElementById('NewImageDesc').value,
+        };
+        axios.put(`http://www.holy-driver.tools:4000/photos/` + this.state.photoToUpdate['PhotoID'], photo, this.header)
+            .then(async res => {
+                // TODO modif
+                this.state.photos.push(res.data);
+                // TOOD modif
+                await this.setState({'visibleNewPhoto': false});
+                toast.info("Photo modifiée");
+            }).catch(err => {
+            console.error(err);
+            toast.error("Erreur lors de la modification");
+        });
+        this.setState({uploadDone: true});
+    };
+
+    handleCancelUpdatePhotoModal = async () => {
+        await this.setState({visibleUpdatePhoto: false});
+    };
+
     handleCancelNewPhotoModal = e => {
         this.setState({'visibleNewPhoto': false});
+        document.getElementById('NewImageDesc').value = '';
+        this.setState({categChosen: false});
+        this.setState({subCategoryToAdd: []});
+        this.setState({categoryToAdd: []});
+        this.setState({destinationToAdd: []});
+        this.setState({destChosen: false});
+        this.setState({fileName: ''});
+        this.setState({fileBin: ''});
     };
 
     // Part Edit Photo
-    showModalEditPhotoModal = e => {
-        axios.get('http://www.holy-driver.tools:4000/photos/' + e.currentTarget.id, {headers: {"Access-Control-Allow-Origin": "*"}})
-            .then(res => {
-                const photo = res.data;
-                this.selectedPhotosEdit = photo;
-                this.stateEditPhotoModal.visible = true;
-                this.selectedPhoto = photo['PhotoID'];
-                axios.get('http://www.holy-driver.tools:4000/photos/' + this.selectedPhoto, {headers: {"Access-Control-Allow-Origin": "*"}})
-                    .then(res => {
-                        const user = res.data;
-                        this.setState({
-                            visible: true,
-                            titleEdit: photo.title,
-                            contentEdit: photo.content,
-                            userAssigned: user.email
-                        });
-                    });
-            });
+    showModalEditPhotoModal = async e => {
+        const id = e.currentTarget.id;
+        for (let photo of this.state.photos) {
+            if (photo['PhotoID'] === parseInt(id)) {
+                this.setState({photoToUpdate : photo});
+                await this.setState({visibleUpdatePhoto: true});
+                document.getElementById('UpdateImageDesc').value = photo['description'];
+                await this.setState({destinationToUpdate: photo['DestinationID']});
+                for (let cat of this.state.allCategories) {
+                    if (cat['CategoryID'] === photo['category']) {
+                        console.log(cat);
+                        await this.setState({categoryToUpdate: [cat]});
+                        await this.setState({subCategoryToUpdate: []});
+                        await this.setState({sub_categories_to_update: cat['sub_categories']});
+                    } else {
+                        for (let sub_cat of cat['sub_categories']) {
+                            if (sub_cat['CategoryID'] === photo['category']) {
+                                await this.setState({categoryToUpdate: [cat]});
+                                await this.setState({subCategoryToUpdate: [sub_cat]});
+                                await this.setState({sub_categories_to_update: cat['sub_categories']});
+                            }
+                        }
+                    }
+                }
+                for (let dest of this.state.allDestinations) {
+                    if (dest['DestinationID'] === photo['destination']) {
+                        await this.setState({destinationToUpdate: [dest]});
+                    }
+                }
+                break;
+            }
+        }
     };
 
 
@@ -409,6 +465,55 @@ export default class HomeAdmin extends React.Component {
                                 </Form.Item>
                                 <Form.Item>
                                     <input id="upload" type="file" name="file" onChange={this.addFile}/>
+                                </Form.Item>
+                                <div style={{textAlign: "center"}}>
+                                    <img alt="Loading"
+                                         src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
+                                         hidden={this.state.uploadDone}
+                                         width={"10%"}/>
+                                </div>
+                            </Form>
+                        </Modal>
+                        <Modal
+                            title="Modifier une image"
+                            visible={this.state.visibleUpdatePhoto}
+                            onOk={this.handleOkUpdatePhotoModal}
+                            onCancel={this.handleCancelUpdatePhotoModal}
+                            cancelText="Annuler"
+                            okText={'Modifier'}>
+                            <Form id="updateImage">
+                                <Form.Item>
+                                    <Input
+                                        prefix={<Icon type="project" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                                        placeholder="Description" id={"UpdateImageDesc"} value={this.state.photoToUpdate['description']}/>
+                                </Form.Item>
+                                <Form.Item>
+                                    <Select onChange={(value) => this.setDestinationAdd(value)}
+                                            options={this.state.allDestinations}
+                                            labelField={'name'}
+                                            loading={this.state.load}
+                                            searchBy={'name'}
+                                            valueField={'DestinationID'}
+                                            values={this.state.destinationToUpdate}/>
+                                </Form.Item>
+                                <Form.Item>
+                                    <Select onChange={(value) => this.setCategoryAdd(value)}
+                                            options={this.state.allCategories}
+                                            labelField={'title'}
+                                            loading={this.state.load}
+                                            searchBy={'title'}
+                                            valueField={'CategoryID'}
+                                            values={this.state.categoryToUpdate}/>
+                                </Form.Item>
+                                <Form.Item>
+                                    <Select onChange={(value) => this.setSubCategoryAdd(value)}
+                                            options={this.state.sub_categories_to_update}
+                                            disabled={this.state.sub_categories_to_update.length === 0}
+                                            labelField={'title'}
+                                            loading={this.state.load}
+                                            searchBy={'title'}
+                                            valueField={'CategoryID'}
+                                            values={this.state.subCategoryToUpdate}/>
                                 </Form.Item>
                                 <div style={{textAlign: "center"}}>
                                     <img alt="Loading"
