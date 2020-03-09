@@ -33,12 +33,14 @@ export default class HomeAdmin extends React.Component {
         uploadDone: true
     };
 
+    header;
     selectedPhotosEdit;
 
     //, "Authorization": 'Bearer ' + Cookies.get('jwt')}
 
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
+            this.header = {headers: {"Authorization": 'Bearer ' + Cookies.get('jwt')}};
             axios.get('http://www.holy-driver.tools:4000/photos').then(res => {
                 this.setState({photos: res.data});
             }).catch(err => {
@@ -72,24 +74,25 @@ export default class HomeAdmin extends React.Component {
             alert("Merci de rentrer un titre");
             return;
         }
-        this.setState({uploadDone : false});
+        this.setState({uploadDone: false});
         const photo = {
-            'category':  this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
+            'category': this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
             'destination': this.state.destinationToAdd[0]['DestinationID'],
             'description': document.getElementById('NewImageDesc').value,
             'title': this.state.fileName,
             'binary': this.state.fileBin
         };
-        axios.post(`http://www.holy-driver.tools:4000/photos`, photo, {headers: {"Authorization": 'Bearer ' + Cookies.get('jwt')}})
+        console.log(this.header);
+        axios.post(`http://www.holy-driver.tools:4000/photos`, photo, this.header)
             .then(async res => {
                 this.state.photos.push(res.data);
                 await this.setState({'visibleNewPhoto': false});
                 toast.info("Photo ajoutée");
             }).catch(err => {
-                console.error(err);
-                toast.error("Erreur lors de l'ajout");
+            console.error(err);
+            toast.error("Erreur lors de l'ajout");
         });
-        this.setState({uploadDone : false});
+        this.setState({uploadDone: true});
     };
 
     handleCancelNewPhotoModal = e => {
@@ -234,11 +237,22 @@ export default class HomeAdmin extends React.Component {
         this.setState({addedFile: true});
     };
 
-    onDeletePhoto = e => {
-        axios.delete('http://www.holy-driver.tools:4000/photos/' + e.currentTarget.id, {headers: {"Access-Control-Allow-Origin": "*"}})
-            .then(res => {
-                window.location.reload();
-            });
+    onDeletePhoto = async e => {
+        const id = e.currentTarget.id;
+        axios.delete('http://www.holy-driver.tools:4000/photos/' + id, this.header)
+            .then(async () => {
+                let newPhotoList = this.state.photos;
+                for (let i = 0; i < this.state.photos.length; i++) {
+                    if (this.state.photos[i]['PhotoID'] === parseInt(id)) {
+                        newPhotoList.splice(i, 1);
+                        break;
+                    }
+                }
+                await this.setState({photos: newPhotoList});
+                toast.info("Photo supprimée");
+            }).catch(() => {
+            toast.error("Erreur lors de la suppression");
+        });
     };
 
     render() {
@@ -316,28 +330,35 @@ export default class HomeAdmin extends React.Component {
                             <Row>
                                 {
                                     this.state.photos.map(photo =>
-                                        <Col span={8} key={photo['PhotoID']}>
-                                            <Card bordered={true}
-                                                  style={{width: 300, marginBottom: '2%'}}
-                                                  title={photo.description} className={"Photo"}
-                                                  extra={
-                                                      <Icon type="close"
-                                                            style={{
-                                                                float: "right",
-                                                                fontSize: "20px",
-                                                                cursor: "pointer"
-                                                            }}
-                                                            onClick={this.onDeletePhoto}
-                                                            id={photo['PhotoID']}/>
-                                                  }
-                                            >
-                                                <img alt={photo.description} src={photo.url}
-                                                     style={{width: '100%', marginBottom: '6px'}}/>
-                                                <Icon type="edit"
-                                                      style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                                                      onClick={this.showModalEditPhotoModal}
-                                                      id={photo['PhotoID']}/>
-                                            </Card>
+
+                                        <Col span={6} key={photo['PhotoID']} style={{height: "20em"}}>
+                                            <div style={{maxHeight: "100%", overflow: "hidden"}}>
+                                                <Card bordered={true}
+                                                      style={{width: "80%", marginBottom: '2%'}}
+                                                      title={photo.description} className={"Photo"}
+                                                      extra={
+                                                          <Icon type="close"
+                                                                style={{
+                                                                    float: "right",
+                                                                    fontSize: "20px",
+                                                                    cursor: "pointer"
+                                                                }}
+                                                                onClick={this.onDeletePhoto}
+                                                                id={photo['PhotoID']}/>
+                                                      }
+                                                >
+                                                    <img alt={photo.description} src={photo.url}
+                                                         style={{
+                                                             width: '100%',
+                                                             maxHeight: "20em",
+                                                             marginBottom: '6px'
+                                                         }}/>
+                                                    <Icon type="edit"
+                                                          style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                                                          onClick={this.showModalEditPhotoModal}
+                                                          id={photo['PhotoID']}/>
+                                                </Card>
+                                            </div>
                                         </Col>
                                     )
                                 }
@@ -390,7 +411,8 @@ export default class HomeAdmin extends React.Component {
                                     <input id="upload" type="file" name="file" onChange={this.addFile}/>
                                 </Form.Item>
                                 <div style={{textAlign: "center"}}>
-                                    <img alt="Loading" src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
+                                    <img alt="Loading"
+                                         src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
                                          hidden={this.state.uploadDone}
                                          width={"10%"}/>
                                 </div>
