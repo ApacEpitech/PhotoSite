@@ -352,20 +352,23 @@ export default class HomeAdmin extends React.Component {
                     <div className="logo"/>
                     <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
                         <Menu.Item key="1">
-                            <Icon type="unordered-list"/>
+                            <Icon type="picture"/>
                             <span className="nav-text">Photos</span>
-
                         </Menu.Item>
                         <Menu.Item key="2">
-                            <Icon type="user"/>
+                            <Icon type="unordered-list"/>
                             <span className="nav-text">Catégories</span>
-                            <Link to={"./users"}/>
+                            <Link to={"./categories"}/>
                         </Menu.Item>
                         <Menu.Item key="3">
+                            <Icon type="car"/>
+                            <span className="nav-text">Destinations</span>
+                            <Link to={'./destination'}/>
+                        </Menu.Item>
+                        <Menu.Item key="4">
                             <Icon type="poweroff"/>
                             <span className="nav-text">Déconnexion</span>
                             <Link to={'./login'}/>
-
                         </Menu.Item>
                     </Menu>
                 </Sider>
