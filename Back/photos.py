@@ -95,7 +95,7 @@ def update_photo(_id):
     _destination = _json.get('destination')
     _description = _json.get('description')
     # validate the received values
-    if _category and _destination and _description:
+    if _category is not None and _destination is not None and _description is not None:
         # save edits
         table.update_item(
             Key={'PhotoID': decimal.Decimal(_id)},
