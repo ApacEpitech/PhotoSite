@@ -125,6 +125,7 @@ export default class HomeAdmin extends React.Component {
                 }
                 await this.setState({'visibleNewPhoto': false});
                 toast.info("Photo modifiée");
+                await this.setState({visibleUpdatePhoto: false});
             }).catch(err => {
             console.error(err);
             toast.error("Erreur lors de la modification");
@@ -293,7 +294,7 @@ export default class HomeAdmin extends React.Component {
     };
 
     setSubCategoryUpdate = subCategoryToUpdate => {
-        this.setState({subCategoryToAdd: subCategoryToUpdate});
+        this.setState({subCategoryToUpdate: subCategoryToUpdate});
     };
 
     setDestinationAdd = async destinationToAdd => {
