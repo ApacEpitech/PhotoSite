@@ -36,11 +36,11 @@ export default class HomeAdmin extends React.Component {
         destChosen: false,
         visibleNewPhoto: false,
         visibleUpdatePhoto: false,
-        uploadDone: true
+        uploadDone: true,
+        titleToUpdate:""
     };
 
     header;
-    selectedPhotosEdit;
 
     //, "Authorization": 'Bearer ' + Cookies.get('jwt')}
 
@@ -101,21 +101,28 @@ export default class HomeAdmin extends React.Component {
     };
 
     handleOkUpdatePhotoModal = async () => {
-        if (document.getElementById('NewImageDesc').value === "") {
+        if (document.getElementById('UpdateImageDesc').value === "") {
             alert("Merci de rentrer un titre");
             return;
         }
         this.setState({uploadDone: false});
         const photo = {
-            'category': this.state.subCategoryToAdd.length > 0 ? this.state.subCategoryToAdd[0]['CategoryID'] : this.state.categoryToAdd[0]['CategoryID'],
+            'category': this.state.subCategoryToUpdate.length > 0 ? this.state.subCategoryToUpdate[0]['CategoryID'] : this.state.categoryToUpdate[0]['CategoryID'],
             'destination': this.state.destinationToAdd[0]['DestinationID'],
-            'description': document.getElementById('NewImageDesc').value,
+            'description': document.getElementById('UpdateImageDesc').value,
         };
-        axios.put(`http://www.holy-driver.tools:4000/photos/` + this.state.photoToUpdate['PhotoID'], photo, this.header)
-            .then(async res => {
-                // TODO modif
-                this.state.photos.push(res.data);
-                // TOOD modif
+        axios.put(`http://www.holy-driver.tools:4000/photos/` + parseInt(this.state.photoToUpdate['PhotoID']), photo, this.header)
+            .then(async () => {
+                let new_photos = this.state.photos;
+                for (let ph of new_photos) {
+                    if (ph['PhotoID'] === this.state.photoToUpdate['PhotoID']) {
+                        ph['category'] = photo['category'];
+                        ph['destination'] = photo['destination'];
+                        ph['description'] = photo['description'];
+                        this.setState({photos: new_photos});
+                        break;
+                    }
+                }
                 await this.setState({'visibleNewPhoto': false});
                 toast.info("Photo modifiée");
             }).catch(err => {
@@ -129,7 +136,7 @@ export default class HomeAdmin extends React.Component {
         await this.setState({visibleUpdatePhoto: false});
     };
 
-    handleCancelNewPhotoModal = e => {
+    handleCancelNewPhotoModal = () => {
         this.setState({'visibleNewPhoto': false});
         document.getElementById('NewImageDesc').value = '';
         this.setState({categChosen: false});
@@ -148,11 +155,10 @@ export default class HomeAdmin extends React.Component {
             if (photo['PhotoID'] === parseInt(id)) {
                 this.setState({photoToUpdate : photo});
                 await this.setState({visibleUpdatePhoto: true});
-                document.getElementById('UpdateImageDesc').value = photo['description'];
+                await this.setState({titleToUpdate: photo['description']});
                 await this.setState({destinationToUpdate: photo['DestinationID']});
                 for (let cat of this.state.allCategories) {
                     if (cat['CategoryID'] === photo['category']) {
-                        console.log(cat);
                         await this.setState({categoryToUpdate: [cat]});
                         await this.setState({subCategoryToUpdate: []});
                         await this.setState({sub_categories_to_update: cat['sub_categories']});
@@ -265,8 +271,29 @@ export default class HomeAdmin extends React.Component {
         await this.setState({categoryToAdd});
     };
 
-    setSubCategoryAdd = async subCategoryToAdd => {
+    setCategoryUpdate = async categoryToUpdate => {
+        if (categoryToUpdate.length > 0) {
+            await this.setState({sub_categories_to_update: categoryToUpdate[0]['sub_categories']});
+            let sub_cat_new = [];
+            for (let sub_cat_av of this.state.subCategoryToUpdate) {
+                if (this.state.sub_categories_to_update.includes(sub_cat_av)) {
+                    sub_cat_new.push(sub_cat_av);
+                }
+            }
+            await this.setState({subCategoryToUpdate: sub_cat_new});
+        } else {
+            await this.setState({sub_categories_to_update: []});
+            await this.setState({subCategoryToUpdate: []});
+        }
+        await this.setState({categoryToUpdate});
+    };
+
+    setSubCategoryAdd = subCategoryToAdd => {
         this.setState({subCategoryToAdd: subCategoryToAdd});
+    };
+
+    setSubCategoryUpdate = subCategoryToUpdate => {
+        this.setState({subCategoryToAdd: subCategoryToUpdate});
     };
 
     setDestinationAdd = async destinationToAdd => {
@@ -485,8 +512,10 @@ export default class HomeAdmin extends React.Component {
                                 <Form.Item>
                                     <Input
                                         prefix={<Icon type="project" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                                        placeholder="Description" id={"UpdateImageDesc"} value={this.state.photoToUpdate['description']}/>
-                                </Form.Item>
+                                        placeholder="Description" id={"UpdateImageDesc"}
+                                        value={this.state.titleToUpdate}
+                                        onChange={(e) => {this.setState({titleToUpdate: e.target.value })}}/>
+                                        </Form.Item>
                                 <Form.Item>
                                     <Select onChange={(value) => this.setDestinationAdd(value)}
                                             options={this.state.allDestinations}
@@ -497,7 +526,7 @@ export default class HomeAdmin extends React.Component {
                                             values={this.state.destinationToUpdate}/>
                                 </Form.Item>
                                 <Form.Item>
-                                    <Select onChange={(value) => this.setCategoryAdd(value)}
+                                    <Select onChange={(value) => this.setCategoryUpdate(value)}
                                             options={this.state.allCategories}
                                             labelField={'title'}
                                             loading={this.state.load}
@@ -506,7 +535,7 @@ export default class HomeAdmin extends React.Component {
                                             values={this.state.categoryToUpdate}/>
                                 </Form.Item>
                                 <Form.Item>
-                                    <Select onChange={(value) => this.setSubCategoryAdd(value)}
+                                    <Select onChange={(value) => this.setSubCategoryUpdate(value)}
                                             options={this.state.sub_categories_to_update}
                                             disabled={this.state.sub_categories_to_update.length === 0}
                                             labelField={'title'}
