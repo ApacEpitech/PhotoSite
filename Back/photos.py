@@ -87,7 +87,7 @@ def photo(_id):
     return Response(json.dumps(photo_found, cls=DecimalEncoder.DecimalEncoder), status=200, mimetype='application/json')
 
 
-@app.route('/photo/<_id>', methods=['PUT'])
+@app.route('/photos/<_id>', methods=['PUT'])
 @jwt_required
 def update_photo(_id):
     _json = request.json
