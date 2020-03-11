@@ -15,13 +15,15 @@ table = dynamodb.Table('Categories')
 def add_category():
     _json = request.json
     _title = _json.get('title')
+    _parent = _json.get('parent')
+    item = {}
     # validate the received values
     if _title:
         # save details
-        item = {
-            'CategoryID': decimal.Decimal(max_id() + 1),
-            'title': _title
-        }
+        item['CategoryID'] = decimal.Decimal(max_id() + 1)
+        item['title'] = _title
+        if _parent:
+            item['parent'] = _parent
         table.put_item(Item=item)
         return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
     else:
@@ -77,15 +79,20 @@ def update_category():
     _json = request.json
     _title = _json.get('title')
     _id = _json.get('CategoryID')
+    _parent = _json.get('parent')
+    if _parent:
+        update_expr = "set title = :title"
+        expr_values = {':title': _title}
+    else:
+        update_expr = "set title = :title, parent = :parent"
+        expr_values = {':title': _title, ':parent': _parent}
     # validate the received values
     if _id and _title:
         # save edits
         table.update_item(
             Key={'CategoryID': decimal.Decimal(_id)},
-            UpdateExpression="set title = :title",
-            ExpressionAttributeValues={
-                ':title': _title
-            },
+            UpdateExpression=update_expr,
+            ExpressionAttributeValues=expr_values,
             ReturnValues="UPDATED_NEW"
         )
         return category(_id)
