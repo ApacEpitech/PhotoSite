@@ -88,13 +88,13 @@ export default class Categories extends React.Component {
         let new_cat = {'title': ' '};
         new_cat['parent'] = id;
 
-        axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
+        await axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
             .then(async res => {
-                new_cat['CategoryID'] = res.data['CategoryID'];
+                new_cat['CategoryID'] = res.data.CategoryID;
                 toast.info("Catégorie créée");
             }).catch(err => {
-            console.error(err);
-            toast.error("Erreur lors de l'ajout");
+                console.error(err);
+                toast.error("Erreur lors de l'ajout");
         });
 
         if (id !== -1) {
@@ -133,7 +133,7 @@ export default class Categories extends React.Component {
     };
 
     deleteCategory = (id) => {
-
+        console.log(id);
     };
 
     handleOnChange = (newValue) => {
@@ -189,7 +189,7 @@ export default class Categories extends React.Component {
                             </div>
                             <br/>
 
-                            <Row>
+                            <Row style={{height: "100%"}}>
                                 <TreeTable value={this.state.categoriesTree}
                                            onChange={this.handleOnChange}>
                                     <TreeTable.Column
