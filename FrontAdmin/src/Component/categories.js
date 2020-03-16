@@ -5,6 +5,8 @@ import {Link} from "react-router-dom";
 import axios from "axios";
 import Cookies from 'js-cookie';
 import {TreeTable, TreeState} from 'cp-react-tree-table';
+import {toast} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.min.css';
 
 const {Content, Footer, Sider} = Layout;
 
@@ -46,7 +48,14 @@ export default class Categories extends React.Component {
             if (cat['sub_categories'] !== undefined && cat['sub_categories'].length > 0) {
                 new_cat['children'] = [];
                 for (let sub_cat of cat['sub_categories']) {
-                    new_cat['children'].push({height: 40, data: {"CategoryID": sub_cat['CategoryID'], "title": sub_cat['title'], "parent": cat['CategoryID']}});
+                    new_cat['children'].push({
+                        height: 40,
+                        data: {
+                            "CategoryID": sub_cat['CategoryID'],
+                            "title": sub_cat['title'],
+                            "parent": cat['CategoryID']
+                        }
+                    });
                 }
             }
             all_cats.push(new_cat);
@@ -65,7 +74,10 @@ export default class Categories extends React.Component {
                         )
                         : ''
                     }
-                    <Input type="text" style={{width: "80%"}} value={row.data.title} onChange={(e) => {row.data.title = e.target.value; this.setState(this.state.categoriesTree)}}/>
+                    <Input type="text" style={{width: "80%"}} value={row.data.title} onChange={(e) => {
+                        row.data.title = e.target.value;
+                        this.setState(this.state.categoriesTree)
+                    }}/>
                 </div>
             );
         }
@@ -73,13 +85,30 @@ export default class Categories extends React.Component {
 
     addChild = async (id) => {
         let cats = this.state.categories;
-        for (let cat of cats) {
-            if (cat['CategoryID'] === id) {
-                if (cat['sub_categories'] === undefined) {
-                    cat['sub_categories'] = [];
+        let new_cat = {'title': ' '};
+        if (id !== -1) {
+            new_cat['parent'] = id;
+        }
+        axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
+            .then(async res => {
+                new_cat['CategoryID'] = res.data['CategoryID'];
+                toast.info("Catégorie créée");
+            }).catch(err => {
+            console.error(err);
+            toast.error("Erreur lors de l'ajout");
+        });
+
+        if (id !== -1) {
+            for (let cat of cats) {
+                if (cat['CategoryID'] === id) {
+                    if (cat['sub_categories'] === undefined) {
+                        cat['sub_categories'] = [];
+                    }
+                    cat['sub_categories'].push(new_cat);
                 }
-                cat['sub_categories'].push({'CategoryID': -1, 'title' : ''});
             }
+        } else {
+            cats.push(new_cat);
         }
         await this.setState({categories: cats});
         await this.convertCategoriesToTree();
@@ -88,12 +117,14 @@ export default class Categories extends React.Component {
     renderButtonCell = (row) => {
         return (
             <div>
-                <Icon type={"plus"} onClick={async () => {await this.addChild(row.data.CategoryID)}}
+                <Icon type={"plus"} onClick={async () => {
+                    await this.addChild(row.data.CategoryID)
+                }}
                       style={{visibility: row.metadata.depth === 0 ? "visible" : "hidden"}}/>
-                    <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                          onClick={() => this.updateCategory(row.data)}/>
-                    <Icon type="delete" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                          onClick={() => this.deleteCategory(row.data.CategoryID)}/>
+                <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                      onClick={() => this.updateCategory(row.data)}/>
+                <Icon type="delete" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                      onClick={() => this.deleteCategory(row.data.CategoryID)}/>
             </div>
         );
     };
@@ -150,6 +181,8 @@ export default class Categories extends React.Component {
                                 <h3 style={{textAlign: "left"}}>Categories</h3>
                             </div>
                             <div>
+                                <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                                      onClick={() => this.addChild(-1)}/>
                                 <img alt="Loading" style={{float: "right"}}
                                      src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
                                      hidden={this.state.uploadDone}
