@@ -20,7 +20,7 @@ export default class Categories extends React.Component {
         load: true,
         visibleNewCategory: false,
         visibleUpdateCategory: false,
-        uploadDone: true,
+        uploadDone: false,
         titleToUpdate: ""
     };
 
@@ -32,7 +32,7 @@ export default class Categories extends React.Component {
             axios.get('http://www.holy-driver.tools:4000/categories').then(async res => {
                 this.setState({categories: res.data});
                 await this.convertCategoriesToTree();
-                this.setState({load: false});
+                this.setState({uploadDone: true});
             }).catch(err => {
                 console.error(err);
             });
@@ -86,9 +86,8 @@ export default class Categories extends React.Component {
     addChild = async (id) => {
         let cats = this.state.categories;
         let new_cat = {'title': ' '};
-        if (id !== -1) {
-            new_cat['parent'] = id;
-        }
+        new_cat['parent'] = id;
+
         axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
             .then(async res => {
                 new_cat['CategoryID'] = res.data['CategoryID'];
