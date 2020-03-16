@@ -22,7 +22,7 @@ def add_category():
         # save details
         item['CategoryID'] = decimal.Decimal(max_id() + 1)
         item['title'] = _title
-        if _parent:
+        if _parent != -1:
             item['parent'] = _parent
         table.put_item(Item=item)
         return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
