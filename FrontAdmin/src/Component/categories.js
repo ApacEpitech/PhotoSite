@@ -26,7 +26,7 @@ export default class Categories extends React.Component {
 
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
-
+            this.header = {headers: {"Authorization": 'Bearer ' + Cookies.get('jwt')}};
             axios.get('http://www.holy-driver.tools:4000/categories').then(async res => {
                 this.setState({categories: res.data});
                 await this.convertCategoriesToTree();
@@ -46,20 +46,13 @@ export default class Categories extends React.Component {
             if (cat['sub_categories'] !== undefined && cat['sub_categories'].length > 0) {
                 new_cat['children'] = [];
                 for (let sub_cat of cat['sub_categories']) {
-                    new_cat['children'].push({height: 40, data: {"CategoryID": sub_cat['CategoryID'], "title": sub_cat['title']}});
+                    new_cat['children'].push({height: 40, data: {"CategoryID": sub_cat['CategoryID'], "title": sub_cat['title'], "parent": cat['CategoryID']}});
                 }
             }
             all_cats.push(new_cat);
         }
         await this.setState({categoriesTree: TreeState.expandAll(TreeState.create(all_cats))});
     }
-
-// Part add Category
-    showModalNewCategoryModal = () => {
-        this.setState({
-            visibleNewCategory: true,
-        });
-    };
 
     renderTitleCell = (row) => {
         if (row.data !== undefined) {
@@ -93,11 +86,24 @@ export default class Categories extends React.Component {
     };
 
     renderButtonCell = (row) => {
-        if (row.metadata.depth === 0) {
-            return (
-                <Icon type={"plus"} onClick={async () => {await this.addChild(row.data.CategoryID)}}/>
-            );
-        }
+        return (
+            <div>
+                <Icon type={"plus"} onClick={async () => {await this.addChild(row.data.CategoryID)}}
+                      style={{visibility: row.metadata.depth === 0 ? "visible" : "hidden"}}/>
+                    <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                          onClick={() => this.updateCategory(row.data)}/>
+                    <Icon type="delete" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                          onClick={() => this.deleteCategory(row.data.CategoryID)}/>
+            </div>
+        );
+    };
+
+    updateCategory = (data) => {
+        console.log(data);
+    };
+
+    deleteCategory = (id) => {
+
     };
 
     handleOnChange = (newValue) => {
@@ -144,8 +150,6 @@ export default class Categories extends React.Component {
                                 <h3 style={{textAlign: "left"}}>Categories</h3>
                             </div>
                             <div>
-                                <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                                      onClick={this.showModalNewCategoryModal}/>
                                 <img alt="Loading" style={{float: "right"}}
                                      src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
                                      hidden={this.state.uploadDone}
