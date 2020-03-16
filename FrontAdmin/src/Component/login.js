@@ -2,7 +2,7 @@ import React from "react";
 import { Form, Icon, Input, Button } from 'antd';
 import Cookies from 'js-cookie';
 
-import './login.css';
+import './style.css';
 
 import 'antd/dist/antd.css';
 import axios from "axios";
@@ -22,7 +22,7 @@ class Login extends React.Component{
                         if (res.status === 200) {
                             const token = res.data['access_token'];
                             Cookies.set('jwt', token);
-                            window.location = './homeAdmin';
+                            window.location = './photos';
                         } else {
                             alert("Email Or Password Incorrect")
                         }
@@ -46,32 +46,32 @@ class Login extends React.Component{
             <Form onSubmit={this.handleSubmit} className="login-form">
                 <h1 style={{textAlign: "center"}}>Interface administrateur</h1>
                 <Form.Item>
-                 {getFieldDecorator('username', {
-                     rules: [{ required: true, message: 'Merci de rentrer votre adresse email' }],
-                 })(
-                     <Input
-                         prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                         placeholder="Adresse email"
-                     />,
-                 )}
-             </Form.Item>
-             <Form.Item>
-                 {getFieldDecorator('password', {
-                     rules: [{ required: true, message: 'Merci de saisir un mot de passe' }],
-                 })(
-                     <Input
-                         prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-                         type="password"
-                         placeholder="Mot de passe"
-                     />,
-                 )}
-             </Form.Item>
-             <Form.Item>
-                 <Button type="primary" htmlType="submit" className="login-form-button">
-                     Se connecter
-                 </Button>
-             </Form.Item>
-         </Form>
+                    {getFieldDecorator('username', {
+                        rules: [{ required: true, message: 'Merci de rentrer votre adresse email' }],
+                    })(
+                        <Input
+                            prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                            placeholder="Adresse email"
+                        />,
+                    )}
+                </Form.Item>
+                <Form.Item>
+                    {getFieldDecorator('password', {
+                        rules: [{ required: true, message: 'Merci de saisir un mot de passe' }],
+                    })(
+                        <Input
+                            prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                            type="password"
+                            placeholder="Mot de passe"
+                        />,
+                    )}
+                </Form.Item>
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" className="login-form-button">
+                        Se connecter
+                    </Button>
+                </Form.Item>
+            </Form>
         )
     }
 }

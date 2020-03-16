@@ -1,8 +1,0 @@
-.ant-layout-content > div:nth-child(1) > div:nth-child(2) > div {
-    display: inline-block;
-    width: 20%;
-}
-
-.ant-layout-content > div:nth-child(1) > div:nth-child(2) > div:not(first-child) {
-    margin-left: 20px;
-}

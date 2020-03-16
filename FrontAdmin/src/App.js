@@ -1,8 +1,9 @@
 import React from 'react';
 import './App.css';
-import Login from './Component/login/login';
-import Home from './Component/homeAdmin/homeAdmin';
+import Login from './Component/login';
+import Home from './Component/homeAdmin';
 import Users from './Component/users';
+import Categories from './Component/categories';
 import { toast } from 'react-toastify';
 
 import {
@@ -20,7 +21,8 @@ function App() {
         <Route exact path="/login" component={Login}/>
         <Route exact path="/" component={Login}/>
         <Route exact path="/users" component={Users}/>
-        <Route exact path="/homeAdmin" component={Home}/>
+        <Route exact path="/photos" component={Home}/>
+        <Route exact path="/categories" component={Categories}/>
       </Switch>
       </Router>
   );

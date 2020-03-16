@@ -1,6 +1,5 @@
 import React from "react";
 import {Icon, Layout, Menu, Card, Modal, Form, Input, Row, Col} from 'antd';
-import './homeAdmin.css'
 import 'antd/dist/antd.css';
 import {Link} from "react-router-dom";
 import axios from "axios";
@@ -519,7 +518,7 @@ export default class HomeAdmin extends React.Component {
                                         placeholder="Description" id={"UpdateImageDesc"}
                                         value={this.state.titleToUpdate}
                                         onChange={(e) => {this.setState({titleToUpdate: e.target.value })}}/>
-                                        </Form.Item>
+                                </Form.Item>
                                 <Form.Item>
                                     <Select onChange={(value) => this.setDestinationAdd(value)}
                                             options={this.state.allDestinations}
