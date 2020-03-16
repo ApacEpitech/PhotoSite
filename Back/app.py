@@ -32,7 +32,7 @@ def bad_request(missing):
 
 
 @app.errorhandler(401)
-def bad_request(error):
+def unauthorized(error):
     message = {
         'status': 401,
         'message': 'Unauthorized',
