@@ -84,9 +84,12 @@ export default class Categories extends React.Component {
     };
 
     addChild = async (id) => {
+        await this.setState({uploadDone: false});
         let cats = this.state.categories;
         let new_cat = {'title': ' '};
-        new_cat['parent'] = id;
+        if (id !== -1) {
+            new_cat['parent'] = id;
+        }
 
         await axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
             .then(async res => {
@@ -110,6 +113,7 @@ export default class Categories extends React.Component {
             cats.push(new_cat);
         }
         await this.setState({categories: cats});
+        await this.setState({uploadDone: true});
         await this.convertCategoriesToTree();
     };
 
@@ -128,11 +132,25 @@ export default class Categories extends React.Component {
         );
     };
 
-    updateCategory = (data) => {
-        console.log(data);
+    updateCategory = async (data) => {
+        await this.setState({uploadDone: false});
+        axios.put(`http://www.holy-driver.tools:4000/categories`, data, this.header)
+            .then(async () => {
+                toast.info("Modification effectuée");
+            }).catch(async () => {
+                toast.error("Erreur lors de l'ajout");
+            }
+        );
+        for (let cat of this.state.categories) {
+            if (cat.CategoryID === data.CategoryID) {
+                cat.title = data.title;
+            }
+        }
+        await this.setState({uploadDone: false});
     };
 
     deleteCategory = async (id) => {
+        await this.setState({uploadDone: false});
         await axios.delete(`http://www.holy-driver.tools:4000/categories/` + id, this.header)
             .then(async () => {
                 let newCategoriesList = this.state.categories;
@@ -151,12 +169,12 @@ export default class Categories extends React.Component {
                 }
                 this.setState({categories: newCategoriesList});
                 await this.convertCategoriesToTree();
-                this.setState({uploadDone: true});
                 toast.info("Catégorie supprimée");
             }).catch(err => {
                 console.error(err);
                 toast.error("Erreur lors de la suppression");
             });
+        this.setState({uploadDone: true});
     };
 
     handleOnChange = (newValue) => {
@@ -203,7 +221,7 @@ export default class Categories extends React.Component {
                                 <h3 style={{textAlign: "left"}}>Categories</h3>
                             </div>
                             <div>
-                                <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
+                                <Icon type="plus" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
                                       onClick={() => this.addChild(-1)}/>
                                 <img alt="Loading" style={{float: "right"}}
                                      src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"

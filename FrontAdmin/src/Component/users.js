@@ -25,7 +25,6 @@ export default class Users extends React.Component{
         if (Cookies.get('id') !== undefined && Cookies.get('id') !== "") {
             axios.get('http://www.holy-driver.tools:4000/users/' + Cookies.get('id'),{ headers: {"Access-Control-Allow-Origin": "*"}})
                 .then(res => {
-                    console.log(res.data);
                     const users = res.data;
                     if (!users.administrator)  {
                         window.location = 'home';
@@ -37,7 +36,6 @@ export default class Users extends React.Component{
         }
         axios.get('http://www.holy-driver.tools:4000/users',{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
-                console.log(res.data);
                 const users = res.data;
                 this.setState({ users });
             })
@@ -58,11 +56,8 @@ export default class Users extends React.Component{
                     'mail': document.getElementById('NewUserEmail').value,
                     'password': document.getElementById('NewUserPassword').value
                 };
-                console.log(user);
                 axios.post(`http://www.holy-driver.tools:4000/users`, user)
                     .then(res => {
-                        console.log(res);
-                        console.log(res.data);
                         window.location.reload();
                         this.stateNewUserModal.visible = false;
                         this.setState({
@@ -79,7 +74,6 @@ export default class Users extends React.Component{
     };
 
     handleCancelNewUserModal = e => {
-        console.log(e);
         this.stateNewUserModal.visible = false;
 
         this.setState({
@@ -89,10 +83,8 @@ export default class Users extends React.Component{
 
     // Part Edit User
     showModalEditUserModal = e =>{
-        console.log(e);
         axios.get('http://www.holy-driver.tools:4000/users/'+e.currentTarget.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
-                console.log(res.data);
                 const user = res.data;
                 this.selectedUserEdit = user;
                 this.stateEditUserModal.visible = true;
@@ -113,11 +105,8 @@ export default class Users extends React.Component{
                     'banned': this.selectedUserEdit.banned,
                     'administrator': this.selectedUserEdit.administrator
                 };
-                console.log(JSON.stringify(user));
                 axios.put(`http://www.holy-driver.tools:4000/users`, user)
                     .then(res => {
-                        console.log(res);
-                        console.log(res.data);
                         window.location.reload();
                         this.stateNewUserModal.visible = false;
                         this.setState({
@@ -151,7 +140,6 @@ export default class Users extends React.Component{
     onChangeStateBan(e) {
         axios.get('http://www.holy-driver.tools:4000/users/'+e.target.id,{ headers: {"Access-Control-Allow-Origin": "*"}})
             .then(res => {
-                console.log(res.data);
                 const user = res.data;
                 const userData = {
                     '_id': user._id.$oid,
@@ -160,11 +148,8 @@ export default class Users extends React.Component{
                     'banned': !user.banned,
                     'administrator': user.administrator
                 };
-                console.log(JSON.stringify(userData));
                 axios.put(`http://www.holy-driver.tools:4000/users`, userData)
-                    .then(res => {
-                        console.log(res);
-                        console.log(res.data);
+                    .then(() => {
                         window.location.reload();
                     });
             });
