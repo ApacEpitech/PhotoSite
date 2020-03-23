@@ -8,6 +8,7 @@ from boto3.dynamodb.conditions import Key
 from flask_jwt_extended import jwt_required
 
 table = dynamodb.Table('Destinations')
+tablePhoto = dynamodb.Table('Photos')
 
 
 @app.route('/destinations', methods=['POST'])
@@ -69,11 +70,17 @@ def update_destination():
 @app.route('/destinations/<_id>', methods=['DELETE'])
 @jwt_required
 def delete_destinations(_id):
-    table.delete_item(
-        Key={'DestinationID': decimal.Decimal(_id)},
-    )
-    resp = ''
-    return Response(resp, status=200, mimetype='application/json')
+    photos = tablePhoto.scan(ScanFilter={'destination': {'AttributeValueList': [int(_id)],
+                                                         'ComparisonOperator': 'EQ'}})['Items']
+    if len(photos) > 0:
+        table.delete_item(
+            Key={'DestinationID': decimal.Decimal(_id)},
+        )
+        resp = ''
+        return Response(resp, status=200, mimetype='application/json')
+    else:
+        resp = 'Photos are linked to this destination'
+        return Response(resp, status=401, mimetype='application/json')
 
 
 def find_destination(destination_id):
