@@ -81,7 +81,7 @@ def update_category():
     _title = _json.get('title')
     _id = _json.get('CategoryID')
     _parent = _json.get('parent')
-    if _parent:
+    if not _parent:
         update_expr = "set title = :title"
         expr_values = {':title': _title}
     else:
