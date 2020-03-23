@@ -15,13 +15,13 @@ tablePhoto = dynamodb.Table('Photos')
 @jwt_required
 def add_destination():
     _json = request.json
-    _name = _json.get('name')
+    _title = _json.get('title')
     # validate the received values
-    if _name:
+    if _title:
         # save details
         item = {
             'DestinationID': decimal.Decimal(max_id() + 1),
-            'name': _name
+            'title': _title
         }
         table.put_item(Item=item)
         return Response(json.dumps(item, cls=DecimalEncoder.DecimalEncoder), status=201, mimetype='application/json')
@@ -49,22 +49,22 @@ def destination(_id):
 @jwt_required
 def update_destination():
     _json = request.json
-    _name = _json.get('name')
+    _title = _json.get('title')
     _id = _json.get('DestinationID')
     # validate the received values
-    if _id and _name:
+    if _id and _title:
         # save edits
         table.update_item(
             Key={'DestinationID': decimal.Decimal(_id)},
-            UpdateExpression="set name = :name",
+            UpdateExpression="set title = :title",
             ExpressionAttributeValues={
-                ':name': _name
+                ':title': _title
             },
             ReturnValues="UPDATED_NEW"
         )
         return destination(_id)
     else:
-        return bad_request('DestinationID or name')
+        return bad_request('DestinationID or title')
 
 
 @app.route('/destinations/<_id>', methods=['DELETE'])
