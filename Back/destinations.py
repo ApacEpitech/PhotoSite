@@ -72,7 +72,7 @@ def update_destination():
 def delete_destinations(_id):
     photos = tablePhoto.scan(ScanFilter={'destination': {'AttributeValueList': [int(_id)],
                                                          'ComparisonOperator': 'EQ'}})['Items']
-    if len(photos) > 0:
+    if len(photos) == 0:
         table.delete_item(
             Key={'DestinationID': decimal.Decimal(_id)},
         )

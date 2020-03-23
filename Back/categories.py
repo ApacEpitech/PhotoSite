@@ -106,7 +106,7 @@ def update_category():
 def delete_category(_id):
     photos = tablePhoto.scan(ScanFilter={'category': {'AttributeValueList': [int(_id)],
                                                       'ComparisonOperator': 'EQ'}})['Items']
-    if len(photos) > 0:
+    if len(photos) == 0:
         table.delete_item(
             Key={'CategoryID': decimal.Decimal(_id)},
         )
