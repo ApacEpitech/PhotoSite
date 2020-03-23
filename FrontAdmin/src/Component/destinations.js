@@ -10,16 +10,16 @@ import 'react-toastify/dist/ReactToastify.min.css';
 
 const {Content, Footer, Sider} = Layout;
 
-export default class Categories extends React.Component {
+export default class Destinations extends React.Component {
 
     state = {
-        categories: [],
-        categoryToUpdate: {},
-        category_parent: [],
-        categoriesTree: TreeState.createEmpty(),
+        destinations: [],
+        destinationToUpdate: {},
+        destination_parent: [],
+        destinationsTree: TreeState.createEmpty(),
         load: true,
-        visibleNewCategory: false,
-        visibleUpdateCategory: false,
+        visibleNewDestination: false,
+        visibleUpdateDestination: false,
         uploadDone: false,
         titleToUpdate: ""
     };
@@ -29,9 +29,9 @@ export default class Categories extends React.Component {
     componentDidMount() {
         if (Cookies.get('jwt') !== undefined && Cookies.get('jwt') !== "") {
             this.header = {headers: {"Authorization": 'Bearer ' + Cookies.get('jwt')}};
-            axios.get('http://www.holy-driver.tools:4000/categories').then(async res => {
-                this.setState({categories: res.data});
-                await this.convertCategoriesToTree();
+            axios.get('http://www.holy-driver.tools:4000/destinations').then(async res => {
+                this.setState({destinations: res.data});
+                await this.convertDestinationsToTree();
                 this.setState({uploadDone: true});
             }).catch(err => {
                 console.error(err);
@@ -41,167 +41,111 @@ export default class Categories extends React.Component {
         }
     }
 
-    async convertCategoriesToTree() {
-        let all_cats = [];
-        for (let cat of this.state.categories) {
-            let new_cat = {height: 40, data: {"CategoryID": cat['CategoryID'], "title": cat['title']}};
-            if (cat['sub_categories'] !== undefined && cat['sub_categories'].length > 0) {
-                new_cat['children'] = [];
-                for (let sub_cat of cat['sub_categories']) {
-                    new_cat['children'].push({
+    async convertDestinationsToTree() {
+        let all_dests = [];
+        for (let dest of this.state.destinations) {
+            let new_dest = {height: 40, data: {"DestinationID": dest['DestinationID'], "title": dest['title']}};
+            if (dest['sub_destinations'] !== undefined && dest['sub_destinations'].length > 0) {
+                new_dest['children'] = [];
+                for (let sub_dest of dest['sub_destinations']) {
+                    new_dest['children'].push({
                         height: 40,
                         data: {
-                            "CategoryID": sub_cat['CategoryID'],
-                            "title": sub_cat['title'],
-                            "parent": cat['CategoryID']
+                            "DestinationID": sub_dest['DestinationID'],
+                            "title": sub_dest['title']
                         }
                     });
                 }
             }
-            all_cats.push(new_cat);
+            all_dests.push(new_dest);
         }
-        await this.setState({categoriesTree: TreeState.expandAll(TreeState.create(all_cats))});
+        await this.setState({destinationsTree: TreeState.expandAll(TreeState.create(all_dests))});
     }
 
     renderTitleCell = (row) => {
         if (row.data !== undefined) {
             return (
-                <div style={{paddingLeft: (row.metadata.depth * 50) + 'px'}}
-                     className={row.metadata.hasChildren ? 'with-children' : 'without-children'}>
-                    {(row.metadata.hasChildren)
-                        ? (
-                            <button className="toggle-button" onClick={row.toggleChildren}/>
-                        )
-                        : ''
-                    }
+                <div style={{paddingLeft: (row.metadata.depth * 50) + 'px'}}>
                     <Input type="text" style={{width: "80%"}} value={row.data.title} onChange={(e) => {
                         row.data.title = e.target.value;
-                        this.setState(this.state.categoriesTree)
+                        this.setState(this.state.destinationsTree)
                     }}/>
                 </div>
             );
         }
     };
 
-    addChild = async (id) => {
+    addChild = async () => {
         await this.setState({uploadDone: false});
-        let cats = this.state.categories;
-        let new_cat = {'title': ' '};
-        if (id !== -1) {
-            new_cat['parent'] = id;
-        }
+        let dests = this.state.destinations;
+        let new_dest = {'title': ' '};
 
-        await axios.post(`http://www.holy-driver.tools:4000/categories`, new_cat, this.header)
+        await axios.post(`http://www.holy-driver.tools:4000/destinations`, new_dest, this.header)
             .then(async res => {
-                new_cat['CategoryID'] = res.data.CategoryID;
+                new_dest['DestinationID'] = res.data.DestinationID;
                 toast.info("Catégorie créée");
             }).catch(err => {
                 console.error(err);
                 toast.error("Erreur lors de l'ajout");
         });
-
-        if (id !== -1) {
-            for (let cat of cats) {
-                if (cat['CategoryID'] === id) {
-                    if (cat['sub_categories'] === undefined) {
-                        cat['sub_categories'] = [];
-                    }
-                    cat['sub_categories'].push(new_cat);
-                }
-            }
-        } else {
-            cats.push(new_cat);
-        }
-        await this.setState({categories: cats});
+        dests.push(new_dest);
+        await this.setState({destinations: dests});
         await this.setState({uploadDone: true});
-        await this.convertCategoriesToTree();
+        await this.convertDestinationsToTree();
     };
 
     renderButtonCell = (row) => {
         return (
             <div>
-                <Icon type={"plus"} onClick={async () => {
-                    await this.addChild(row.data.CategoryID)
-                }}
-                      style={{visibility: row.metadata.depth === 0 ? "visible" : "hidden"}}/>
                 <Icon type="check" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                      onClick={() => this.updateCategory(row.data)}/>
+                      onClick={() => this.updateDestination(row.data)}/>
                 <Icon type="delete" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                      onClick={() => this.deleteCategory(row.data.CategoryID)}/>
+                      onClick={() => this.deleteDestination(row.data.DestinationID)}/>
             </div>
         );
     };
 
-    updateCategory = async (data) => {
+    updateDestination = async (data) => {
         await this.setState({uploadDone: false});
-        axios.put(`http://www.holy-driver.tools:4000/categories`, data, this.header)
+        console.log(data);
+        axios.put(`http://www.holy-driver.tools:4000/destinations`, data, this.header)
             .then(async () => {
                 toast.info("Modification effectuée");
             }).catch(async () => {
                 toast.error("Erreur lors de l'ajout");
             }
         );
-        for (let cat of this.state.categories) {
-            if (cat.CategoryID === data.CategoryID) {
-                cat.title = data.title;
-                break;
-            } else if (cat['sub_categories'].length > 0) {
-                for (let j = 0; j < cat['sub_categories'].length; j++) {
-                    if (cat['sub_categories'][j]['CategoryID'] === parseInt(data.CategoryID)) {
-                        cat['sub_categories'][j].title = data.title;
-                        break;
-                    }
-                }
+        for (let dest of this.state.destinations) {
+            if (dest.DestinationID === data.DestinationID) {
+                dest.title = data.title;
             }
         }
         await this.setState({uploadDone: false});
     };
 
-    deleteCategory = async (id) => {
+    deleteDestination = async (id) => {
         await this.setState({uploadDone: false});
-        for (let cat of this.state.categories) {
-            if (cat.CategoryID === id) {
-                for (let j = 0; j < cat['sub_categories'].length; j++) {
-                    await this.deleteCategory(cat['sub_categories'][j].CategoryID).then(res => {
-                        if (res === false) {
-                            toast.error("Erreur lors de la suppression de la catégorie " + cat['sub_categories'][j].title);
-                            return false;
-                        }
-                    });
-                }
-            }
-            await this.convertCategoriesToTree();
-        }
-        await axios.delete(`http://www.holy-driver.tools:4000/categories/` + id, this.header)
+        await axios.delete(`http://www.holy-driver.tools:4000/destinations/` + id, this.header)
             .then(async () => {
-                let newCategoriesList = this.state.categories;
-                for (let i = 0; i < this.state.categories.length; i++) {
-                    if (this.state.categories[i]['CategoryID'] === parseInt(id)) {
-                        newCategoriesList.splice(i, 1);
+                let newDestinationsList = this.state.destinations;
+                for (let i = 0; i < this.state.destinations.length; i++) {
+                    if (this.state.destinations[i]['DestinationID'] === parseInt(id)) {
+                        newDestinationsList.splice(i, 1);
                         break;
-                    } else if (this.state.categories[i]['sub_categories'].length > 0) {
-                        for (let j = 0; j < this.state.categories[i]['sub_categories'].length; j++) {
-                            if (this.state.categories[i]['sub_categories'][j]['CategoryID'] === parseInt(id)) {
-                                newCategoriesList[i]['sub_categories'].splice(j, 1);
-                                break;
-                            }
-                        }
                     }
                 }
-                await this.setState({categories: newCategoriesList});
+                this.setState({destinations: newDestinationsList});
+                await this.convertDestinationsToTree();
                 toast.info("Catégorie supprimée");
-                this.setState({uploadDone: true});
-                return true;
             }).catch(err => {
                 console.error(err);
                 toast.error("Erreur lors de la suppression");
-                this.setState({uploadDone: true});
-                return false;
             });
+        this.setState({uploadDone: true});
     };
 
     handleOnChange = (newValue) => {
-        this.setState({categoriesTree: newValue});
+        this.setState({destinationsTree: newValue});
     };
 
     render() {
@@ -215,7 +159,7 @@ export default class Categories extends React.Component {
                         left: 0,
                     }}>
                     <div className="logo"/>
-                    <Menu theme="dark" mode="inline" defaultSelectedKeys={['2']}>
+                    <Menu theme="dark" mode="inline" defaultSelectedKeys={['3']}>
                         <Menu.Item key="1">
                             <Icon type="picture"/>
                             <span className="nav-text">Photos</span>
@@ -224,11 +168,11 @@ export default class Categories extends React.Component {
                         <Menu.Item key="2">
                             <Icon type="unordered-list"/>
                             <span className="nav-text">Catégories</span>
+                            <Link to={"./categories"}/>
                         </Menu.Item>
                         <Menu.Item key="3">
                             <Icon type="car"/>
                             <span className="nav-text">Destinations</span>
-                            <Link to={'./destination'}/>
                         </Menu.Item>
                         <Menu.Item key="4">
                             <Icon type="poweroff"/>
@@ -241,11 +185,11 @@ export default class Categories extends React.Component {
                     <Content style={{margin: '24px 16px 0', overflow: 'initial'}}>
                         <div style={{padding: 24, background: '#fff', textAlign: 'center'}}>
                             <div>
-                                <h3 style={{textAlign: "left"}}>Categories</h3>
+                                <h3 style={{textAlign: "left"}}>Destinations</h3>
                             </div>
                             <div>
                                 <Icon type="plus" style={{float: "right", fontSize: "20px", cursor: "pointer"}}
-                                      onClick={() => this.addChild(-1)}/>
+                                      onClick={() => this.addChild()}/>
                                 <img alt="Loading" style={{float: "right"}}
                                      src=" https://apacphotosite.s3.eu-west-3.amazonaws.com/transparent-welcome-gif-background-3.gif"
                                      hidden={this.state.uploadDone}
@@ -254,7 +198,7 @@ export default class Categories extends React.Component {
                             <br/>
 
                             <Row style={{height: "100%"}}>
-                                <TreeTable value={this.state.categoriesTree}
+                                <TreeTable value={this.state.destinationsTree}
                                            onChange={this.handleOnChange}>
                                     <TreeTable.Column
                                         renderCell={this.renderTitleCell}

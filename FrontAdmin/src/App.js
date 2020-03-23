@@ -4,6 +4,7 @@ import Login from './Component/login';
 import Home from './Component/homeAdmin';
 import Users from './Component/users';
 import Categories from './Component/categories';
+import Destinations from './Component/destinations';
 import { toast } from 'react-toastify';
 
 import {
@@ -23,6 +24,7 @@ function App() {
         <Route exact path="/users" component={Users}/>
         <Route exact path="/photos" component={Home}/>
         <Route exact path="/categories" component={Categories}/>
+        <Route exact path="/destination" component={Destinations}/>
       </Switch>
       </Router>
   );
