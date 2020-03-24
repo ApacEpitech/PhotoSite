@@ -161,17 +161,25 @@ export default class Categories extends React.Component {
         await this.setState({uploadDone: false});
         for (let cat of this.state.categories) {
             if (cat.CategoryID === id) {
-                for (let j = 0; j < cat['sub_categories'].length; j++) {
-                    await this.deleteCategory(cat['sub_categories'][j].CategoryID).then(res => {
+                const bar = new Promise((resolve) => {
+                    cat['sub_categories'].forEach((value) => {
+                        console.log(value);
+                        let res = this.deleteCatByID(value.CategoryID);
                         if (res === false) {
-                            toast.error("Erreur lors de la suppression de la catégorie " + cat['sub_categories'][j].title);
+                            toast.error("Erreur lors de la suppression de la catégorie " + value.title);
                             return false;
                         }
                     });
-                }
+                    resolve();
+                });
+                await bar.then(async () => {
+                    this.deleteCatByID(id);
+                });
             }
-            await this.convertCategoriesToTree();
         }
+    };
+
+    deleteCatByID = async (id) => {
         await axios.delete(`http://www.holy-driver.tools:4000/categories/` + id, this.header)
             .then(async () => {
                 let newCategoriesList = this.state.categories;
@@ -191,6 +199,7 @@ export default class Categories extends React.Component {
                 await this.setState({categories: newCategoriesList});
                 toast.info("Catégorie supprimée");
                 this.setState({uploadDone: true});
+                await this.convertCategoriesToTree();
                 return true;
             }).catch(err => {
                 console.error(err);
