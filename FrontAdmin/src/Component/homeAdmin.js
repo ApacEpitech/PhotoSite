@@ -380,9 +380,9 @@ export default class HomeAdmin extends React.Component {
                             <div>
                                 <Select onChange={(values) => this.setDestinationFilter(values)}
                                         options={this.state.allDestinations}
-                                        labelField={'name'}
+                                        labelField={'title'}
                                         loading={this.state.load}
-                                        searchBy={'name'}
+                                        searchBy={'title'}
                                         multi={true}
                                         valueField={'DestinationID'}
                                         clearable={true}
@@ -468,9 +468,9 @@ export default class HomeAdmin extends React.Component {
                                 <Form.Item>
                                     <Select onChange={(value) => this.setDestinationAdd(value)}
                                             options={this.state.allDestinations}
-                                            labelField={'name'}
+                                            labelField={'title'}
                                             loading={this.state.load}
-                                            searchBy={'name'}
+                                            searchBy={'title'}
                                             valueField={'DestinationID'}
                                             values={this.state.destinationToAdd}/>
                                 </Form.Item>
@@ -522,9 +522,9 @@ export default class HomeAdmin extends React.Component {
                                 <Form.Item>
                                     <Select onChange={(value) => this.setDestinationAdd(value)}
                                             options={this.state.allDestinations}
-                                            labelField={'name'}
+                                            labelField={'title'}
                                             loading={this.state.load}
-                                            searchBy={'name'}
+                                            searchBy={'title'}
                                             valueField={'DestinationID'}
                                             values={this.state.destinationToUpdate}/>
                                 </Form.Item>
