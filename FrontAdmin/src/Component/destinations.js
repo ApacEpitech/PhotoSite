@@ -181,7 +181,7 @@ export default class Destinations extends React.Component {
                         </Menu.Item>
                     </Menu>
                 </Sider>
-                <Layout style={{marginLeft: 200}}>
+                <Layout style={{marginLeft: 200, height:'100vh'}}>
                     <Content style={{margin: '24px 16px 0', overflow: 'initial'}}>
                         <div style={{padding: 24, background: '#fff', textAlign: 'center'}}>
                             <div>

@@ -146,3 +146,7 @@ h1 {
     text-align: right;
     padding-right: 10px;
 }
+
+.cp_tree-table_viewport {
+    height: 80vh !important;
+}
